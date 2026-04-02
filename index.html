@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gabriel Patricio</title>
+  <meta name="description" content="Responsive GitHub Pages portfolio with a cinematic intro, showreel, project overlays, 35mm gallery, and about page." />
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body>
+  <div id="app" class="app">
+    <section id="landing" class="landing-screen" aria-label="Intro screen">
+      <div class="landing-overlay"></div>
+
+      <button id="logo-trigger" class="logo-trigger" aria-label="Enter portfolio">
+        <span class="logo-split logo-top">
+          <img src="assets/media/logo-placeholder.png" alt="Portfolio logo" class="landing-logo" />
+        </span>
+        <span class="logo-divider" aria-hidden="true"></span>
+        <span class="logo-split logo-bottom">
+          <img src="assets/media/logo-placeholder.png" alt="" class="landing-logo" />
+        </span>
+      </button>
+    </section>
+
+    <nav id="corner-nav" class="corner-nav" aria-label="Main navigation">
+      <a href="#showreel" class="corner-link corner-top-left" data-route="showreel">showreel</a>
+      <a href="#35mm" class="corner-link corner-top-right" data-route="35mm">35 mm</a>
+      <a href="#about" class="corner-link corner-bottom-left" data-route="about">about me</a>
+      <div class="corner-link corner-bottom-right social-cluster" aria-label="Social links">
+        <a class="icon-link" href="#" target="_blank" rel="noreferrer" data-social="instagram" aria-label="Instagram"></a>
+        <a class="icon-link" href="#" target="_blank" rel="noreferrer" data-social="vimeo" aria-label="Vimeo"></a>
+        <a class="icon-link" href="#" target="_blank" rel="noreferrer" data-social="linkedin" aria-label="LinkedIn"></a>
+      </div>
+    </nav>
+
+    <main id="showreel" class="showreel-screen" aria-label="Showreel">
+      <div class="showreel-watermark" aria-hidden="true"></div>
+
+      <div class="showreel-mobile-header">
+        <img src="assets/media/logo-placeholder.png" alt="Portfolio logo" class="showreel-logo" />
+        <p class="showreel-subtitle">showreel</p>
+      </div>
+
+      <aside class="filter-sidebar" aria-label="Project filters">
+        <p class="filter-label">Filters</p>
+        <div id="filter-list" class="filter-list"></div>
+      </aside>
+
+      <div id="mobile-filter-toggle" class="mobile-filter-toggle">
+        <button id="toggle-filters-button" type="button">filters</button>
+      </div>
+
+      <div id="project-stage" class="project-stage" aria-live="polite"></div>
+    </main>
+
+    <section id="project-overlay" class="overlay-page project-overlay" aria-hidden="true">
+      <button class="close-overlay" data-close-overlay="project" aria-label="Close project">close</button>
+      <div class="overlay-backdrop"></div>
+      <div class="overlay-panel project-panel">
+        <div class="project-media">
+          <div id="project-video-grid" class="project-video-grid"></div>
+          <div class="project-stills-shell">
+            <div id="project-stills-grid" class="project-stills-grid"></div>
+            <div id="project-stills-dots" class="project-stills-dots" hidden></div>
+          </div>
+        </div>
+        <div class="project-meta">
+          <div class="project-meta-top">
+            <p id="project-type" class="eyebrow"></p>
+            <h1 id="project-title"></h1>
+            <p id="project-subtitle" class="project-subtitle"></p>
+            <p id="project-description" class="project-description"></p>
+          </div>
+
+          <dl class="project-info-grid">
+            <div><dt>Role</dt><dd id="project-role"></dd></div>
+            <div><dt>Year</dt><dd id="project-year"></dd></div>
+            <div><dt>Duration</dt><dd id="project-duration"></dd></div>
+            <div><dt>Client</dt><dd id="project-client"></dd></div>
+          </dl>
+
+          <div class="credits-group">
+            <button id="credits-toggle" class="credits-toggle" type="button" aria-expanded="false">Full Credits</button>
+            <div id="project-credits" class="credits-box" hidden></div>
+          </div>
+        </div>
+      </div>
+      <div id="project-still-viewer" class="project-still-viewer" hidden aria-hidden="true">
+        <button id="project-still-viewer-backdrop" class="project-still-viewer__backdrop" type="button" aria-label="Close still viewer">close</button>
+        <figure class="project-still-viewer__content">
+          <img id="project-still-viewer-image" class="project-still-viewer__image" alt="" />
+        </figure>
+      </div>
+    </section>
+
+    <section id="gallery-overlay" class="overlay-page gallery-overlay" aria-hidden="true">
+      <button class="close-overlay" data-close-overlay="gallery" aria-label="Close 35mm">close</button>
+      <div class="overlay-backdrop"></div>
+      <div class="overlay-panel gallery-panel">
+        <div id="photo-stage" class="photo-stage" aria-label="35mm gallery"></div>
+
+        <div class="gallery-footer gallery-footer-left">
+          <h2 id="album-name">—</h2>
+          <p id="album-details"></p>
+        </div>
+
+        <div class="gallery-footer gallery-footer-right">
+          <div class="gallery-audio-panel">
+            <div id="volume-bars" class="volume-bars" role="group" aria-label="Gallery volume">
+              <button class="volume-line" type="button" data-volume-level="1" aria-label="Set volume to 17 percent"></button>
+              <button class="volume-line" type="button" data-volume-level="2" aria-label="Set volume to 33 percent"></button>
+              <button class="volume-line" type="button" data-volume-level="3" aria-label="Set volume to 50 percent"></button>
+              <button class="volume-line" type="button" data-volume-level="4" aria-label="Set volume to 67 percent"></button>
+              <button class="volume-line" type="button" data-volume-level="5" aria-label="Set volume to 83 percent"></button>
+              <button class="volume-line" type="button" data-volume-level="6" aria-label="Set volume to 100 percent"></button>
+            </div>
+            <button id="mute-audio" class="mute-audio" type="button" aria-pressed="false">mute</button>
+            <audio id="gallery-audio" preload="auto"></audio>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="about-overlay" class="overlay-page about-overlay" aria-hidden="true">
+      <button class="close-overlay" data-close-overlay="about" aria-label="Close about">close</button>
+      <div class="overlay-backdrop"></div>
+      <div class="overlay-panel about-panel">
+        <img src="assets/media/avatar-placeholder.png" alt="Portrait placeholder" class="about-photo" />
+        <div class="about-content">
+          <h2>Gabriel Patrício</h2>
+          <div id="about-description"></div>
+          <a id="about-email" class="about-email" href="mailto:gabriel.patricio@outlook.pt">gabriel.patricio@outlook.pt</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="orientation-guard" class="orientation-guard" role="dialog" aria-modal="true" aria-live="polite" aria-hidden="true" hidden>
+    <img src="assets/media/logo-placeholder.png" alt="Portfolio logo" class="orientation-guard__logo" />
+    <div class="orientation-guard__content">
+      <p class="orientation-guard__title">portrait only</p>
+      <p class="orientation-guard__text">Rotate your phone back to portrait to continue.</p>
+    </div>
+  </div>
+
+  <template id="social-icon-template">
+    <svg viewBox="0 0 24 24" aria-hidden="true" class="social-icon"></svg>
+  </template>
+
+  <script src="https://player.vimeo.com/api/player.js"></script>
+  <script src="assets/js/photo-albums.js"></script>
+  <script src="assets/js/music-tracks.js"></script>
+  <script src="assets/js/site-data.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
