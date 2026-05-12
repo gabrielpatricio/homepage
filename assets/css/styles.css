@@ -126,7 +126,7 @@ body.orientation-guard-active .orientation-guard {
 
 body.intro-complete .landing-screen {
   pointer-events: none;
-  transition: opacity 400ms ease 200ms, visibility 0s linear 600ms;
+  transition: opacity 600ms ease, visibility 0s linear 600ms;
   opacity: 0;
   visibility: hidden;
 }
@@ -164,15 +164,7 @@ body.intro-complete .landing-screen {
   bottom: 0;
 }
 
-body.intro-start .landing-overlay::before {
-  transform: translateY(-102%);
-  opacity: 0.85;
-}
-
-body.intro-start .landing-overlay::after {
-  transform: translateY(102%);
-  opacity: 0.85;
-}
+/* overlay panels — splitting effect removed */
 
 .logo-trigger {
   position: absolute;
@@ -193,7 +185,7 @@ body.intro-start .landing-overlay::after {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: min(51.52vw, 672px);
+  width: 80%;
   height: min(16.8vw, 210px);
   transform: translate(-50%, -50%);
   background: rgba(0, 0, 0, 0.16);
@@ -207,7 +199,7 @@ body.intro-start .landing-overlay::after {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: min(64.4vw, 840px);
+  width: 80%;
   z-index: 2;
   transform: translate(-50%, -50%);
   overflow: hidden;
@@ -282,15 +274,7 @@ body.intro-start .landing-overlay::after {
   opacity: 0;
 }
 
-body.intro-start .landing-logo {
-  animation: none;
-}
-
-body.intro-start .logo-bottom {
-  transform: translate(-50%, 58vh);
-  opacity: 0;
-  transition-delay: 860ms;
-}
+/* intro-start logo effects removed */
 
 /* Corner nav */
 .corner-nav {
@@ -514,8 +498,8 @@ body.route-showreel .project-stage-mobile-backdrop {
   position: absolute;
   display: inline-flex;
   flex-direction: column;
-  gap: 6px;
-  max-width: min(34vw, 450px);
+  gap: 5px;
+  max-width: min(27.2vw, 360px);
   z-index: 2;
   color: #fff;
   text-decoration: none;
@@ -534,7 +518,7 @@ body.route-showreel .project-stage-mobile-backdrop {
 
 .project-item .project-index {
   display: block;
-  font-size: 0.60rem;
+  font-size: 0.48rem;
   letter-spacing: 0.18em;
   color: var(--muted-soft);
   margin-bottom: 2px;
@@ -550,8 +534,8 @@ body.route-showreel .project-stage-mobile-backdrop {
 .project-item .project-meta-line {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 10px;
-  font-size: 0.76rem;
+  gap: 5px 8px;
+  font-size: 0.61rem;
   color: rgba(255, 255, 255, 0.72);
   letter-spacing: 0.08em;
   text-transform: lowercase;
@@ -561,14 +545,14 @@ body.route-showreel .project-stage-mobile-backdrop {
   flex-basis: 100%;
 }
 
-.project-item.highlight-1 .project-title { font-size: clamp(1rem, 1.2vw, 1.25rem); }
-.project-item.highlight-2 .project-title { font-size: clamp(1.3rem, 1.9vw, 2rem); }
-.project-item.highlight-3 .project-title { font-size: clamp(1.9rem, 3.4vw, 4rem); }
+.project-item.highlight-1 .project-title { font-size: clamp(0.8rem, 0.96vw, 1rem); }
+.project-item.highlight-2 .project-title { font-size: clamp(1.04rem, 1.52vw, 1.6rem); }
+.project-item.highlight-3 .project-title { font-size: clamp(1.52rem, 2.72vw, 3.2rem); }
 
 .preview-strip {
   position: absolute;
   display: flex;
-  gap: 14px;
+  gap: 11px;
   width: max-content;
   pointer-events: none;
   opacity: 0;
@@ -600,14 +584,14 @@ body.route-showreel .project-stage-mobile-backdrop {
 }
 
 .preview-strip.dir-right {
-  left: calc(100% + 16px);
+  left: calc(100% + 13px);
   top: 50%;
   transform: translateY(-50%);
   flex-direction: row;
 }
 
 .preview-strip.dir-left {
-  right: calc(100% + 16px);
+  right: calc(100% + 13px);
   top: 50%;
   transform: translateY(-50%);
   flex-direction: row-reverse;
@@ -615,21 +599,21 @@ body.route-showreel .project-stage-mobile-backdrop {
 
 .preview-strip.dir-top {
   left: 0;
-  bottom: calc(100% + 16px);
+  bottom: calc(100% + 13px);
 }
 
 .preview-strip.dir-bottom {
   left: 0;
-  top: calc(100% + 16px);
+  top: calc(100% + 13px);
 }
 
 .preview-image {
-  width: clamp(151px, 15vw, 264px);
+  width: clamp(121px, 12vw, 211px);
   aspect-ratio: 16 / 10;
   object-fit: cover;
   flex: 0 0 auto;
   border-radius: 0;
-  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 27px rgba(0, 0, 0, 0.3);
   background: rgba(255, 255, 255, 0.02);
 }
 
@@ -1929,7 +1913,8 @@ body.route-showreel .project-stage-mobile-backdrop {
 
   .logo-top,
   .logo-bottom {
-    height: min(15vw, 88px);
+    width: 90%;
+    height: auto;
   }
 
   .logo-bottom .landing-logo {

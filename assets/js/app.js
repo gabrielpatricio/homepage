@@ -511,24 +511,12 @@
   async function playIntro() {
     if (state.introPlayed) return;
     state.introPlayed = true;
-    document.body.classList.add("intro-loading");
     sessionStorage.setItem("portfolioIntroSeen", "true");
 
-    try {
-      await state.introReadyPromise;
-    } catch (_) {
-      // Intro should never block even if a preload call fails unexpectedly.
+    completeIntro(false);
+    if (!location.hash || location.hash === "#") {
+      location.hash = "#showreel";
     }
-
-    document.body.classList.add("intro-start");
-    document.body.classList.remove("intro-loading");
-
-    window.setTimeout(() => {
-      completeIntro(false);
-      if (!location.hash || location.hash === "#") {
-        location.hash = "#showreel";
-      }
-    }, 2450);
   }
 
   function completeIntro(immediate = false) {
