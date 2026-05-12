@@ -5,6 +5,7 @@
   const state = {
     selectedFilters: new Set(data.filters),
     introPlayed: false,
+    introIdleTimer: null,
     introReadyPromise: Promise.resolve(),
     scrollLockY: 0,
     pageScrollLocked: false,
@@ -172,8 +173,19 @@
     const alreadySeenIntro = sessionStorage.getItem("portfolioIntroSeen") === "true";
     if (alreadySeenIntro || location.hash) {
       completeIntro(true);
+    } else {
+      scheduleIdleIntro();
     }
     handleRoute();
+  }
+
+  function scheduleIdleIntro() {
+    if (state.introIdleTimer) {
+      window.clearTimeout(state.introIdleTimer);
+    }
+    state.introIdleTimer = window.setTimeout(() => {
+      playIntro({ auto: true });
+    }, 3000);
   }
 
   function preloadIntroAssets() {
@@ -508,10 +520,26 @@
     }, 900);
   }
 
-  async function playIntro() {
+  async function playIntro(options = {}) {
+    const { auto = false } = options;
     if (state.introPlayed) return;
+    if (state.introIdleTimer) {
+      window.clearTimeout(state.introIdleTimer);
+      state.introIdleTimer = null;
+    }
     state.introPlayed = true;
     sessionStorage.setItem("portfolioIntroSeen", "true");
+
+    if (auto) {
+      document.body.classList.add("intro-idle-outro");
+      window.setTimeout(() => {
+        completeIntro(false);
+        if (!location.hash || location.hash === "#") {
+          location.hash = "#showreel";
+        }
+      }, 900);
+      return;
+    }
 
     completeIntro(false);
     if (!location.hash || location.hash === "#") {
@@ -520,8 +548,13 @@
   }
 
   function completeIntro(immediate = false) {
+    if (state.introIdleTimer) {
+      window.clearTimeout(state.introIdleTimer);
+      state.introIdleTimer = null;
+    }
     document.body.classList.remove("intro-loading");
     document.body.classList.remove("intro-start");
+    document.body.classList.remove("intro-idle-outro");
     document.body.classList.add("intro-complete");
     if (immediate) {
       els.landing.style.transition = "none";

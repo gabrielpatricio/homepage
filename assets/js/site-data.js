@@ -2,7 +2,7 @@ window.PORTFOLIO_DATA = {
   site: {
     email: "gabriel.patricio@outlook.pt",
     aboutDescription:
-      "I am a conceptual and sensitive artist, drawn to composition and the quiet power of natural elements in shaping an image. My work seeks balance, between intuition and technique, feeling and structure in order to create visuals that resonate beyond the surface. Alongside my artistic vision, I carry a foundation in cinematography, with experience across sets from music videos to short films and visual projects. My earlier path in computer science, where I earned a masters degree and spent years in the field, continues to influence the way I approach filmmaking. It has given me a way of thinking that is analytical yet imaginative, allowing me to navigate the technical side of cinema while preserving the poetry of the image. For me, film is where sensitivity meets precision, a space where creativity is both free and carefully crafted.",
+      "Gabriel Patrício is a filmmaker and visual artist who believes the best images live somewhere between feeling and structure. Trained in cinematography and rooted in a background of computer science, he brings both a technical eye and an artistic sensitivity to everything he shoots. He is based in Rotterdam, and open to wherever the work takes him.",
     socials: {
       instagram: "https://www.instagram.com/gabriel_patricioo/"
       // vimeo: "https://vimeo.com/",

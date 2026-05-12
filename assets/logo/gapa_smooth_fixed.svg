@@ -1,44 +1,49 @@
-<svg width="100%" viewBox="88 18 372 222" role="img" xmlns="http://www.w3.org/2000/svg">
-  <title>gapa studio wordmark</title>
-  <defs>
-    <clipPath id="clip-g">
-      <rect x="90" y="0" width="0" height="310">
-        <animate attributeName="width" from="0" to="122" dur="0.42s" begin="0.2s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.42 0 0.58 1"/>
-      </rect>
-    </clipPath>
-    <clipPath id="clip-a1">
-      <rect x="204" y="0" width="0" height="310">
-        <animate attributeName="width" from="0" to="96" dur="0.38s" begin="0.56s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.42 0 0.58 1"/>
-      </rect>
-    </clipPath>
-    <clipPath id="clip-p">
-      <rect x="272" y="0" width="0" height="310">
-        <animate attributeName="width" from="0" to="98" dur="0.38s" begin="0.88s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.42 0 0.58 1"/>
-      </rect>
-    </clipPath>
-    <clipPath id="clip-a2">
-      <rect x="354" y="0" width="0" height="310">
-        <animate attributeName="width" from="0" to="104" dur="0.38s" begin="1.2s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.42 0 0.58 1"/>
-      </rect>
-    </clipPath>
-  </defs>
-  <g clip-path="url(#clip-g)">
-    <path fill="#f0ece4" d="M 96,80 C 96,52 116,32 148,30 C 174,28 198,44 206,68 L 206,90 L 170,90 L 170,76 C 167,64 158,58 148,60 C 132,62 124,74 124,92 C 124,110 134,124 150,126 C 164,128 176,120 180,108 L 206,108 L 206,160 C 206,190 184,210 154,212 C 124,214 102,196 100,172 L 126,168 C 128,182 138,190 154,188 C 168,186 178,176 178,162 L 178,130 C 168,138 156,142 144,140 C 116,136 96,112 96,80 Z"/>
-  </g>
-  <g clip-path="url(#clip-a1)" transform="translate(-2 0)">
-    <path fill="#f0ece4" d="M 214,32 C 238,24 268,36 278,64 C 286,86 278,116 258,130 C 242,142 218,140 208,126 L 208,44 C 210,38 212,34 214,32 Z M 234,56 C 224,62 220,76 220,92 C 220,108 228,120 240,122 C 252,124 262,114 264,100 C 266,84 260,66 248,58 C 244,55 239,54 234,56 Z"/>
-    <path fill="#f0ece4" d="M 276,32 C 284,30 292,32 294,38 L 294,220 C 292,228 284,230 276,228 L 276,32 Z"/>
-  </g>
-  <g clip-path="url(#clip-p)">
-    <path fill="#f0ece4" d="M 294,32 C 318,24 352,36 362,66 C 370,90 360,122 338,134 C 320,144 296,140 290,124 L 290,44 C 290,38 292,34 294,32 Z M 314,54 C 302,60 298,76 298,94 C 298,110 306,122 318,124 C 332,126 344,114 346,98 C 348,80 340,62 328,56 C 323,53 318,52 314,54 Z"/>
-    <path fill="#f0ece4" d="M 276,136 C 274,144 274,220 276,228 C 278,234 286,236 294,234 L 294,136 Z"/>
-  </g>
-  <g clip-path="url(#clip-a2)">
-    <path fill="#f0ece4" d="M 370,32 C 394,22 428,36 436,66 C 444,94 432,126 410,138 C 392,148 366,144 358,128 L 358,44 C 360,38 364,34 370,32 Z M 390,56 C 378,62 374,78 374,96 C 374,112 382,124 394,126 C 408,128 418,116 420,100 C 422,82 414,62 402,56 C 398,53 394,53 390,56 Z"/>
-    <path fill="#f0ece4" d="M 434,32 C 442,30 450,32 452,40 L 452,168 C 450,174 442,176 434,174 L 434,32 Z"/>
-  </g>
-  <g opacity="0">
-    <animate attributeName="opacity" from="0" to="1" dur="0.35s" begin="1.52s" fill="freeze"/>
-    <text x="453" y="232" text-anchor="end" fill="#f0ece4" font-family="sans-serif" font-size="6" font-weight="300">studio</text>
-  </g>
+<svg width="100%" viewBox="80 20 360 240" role="img" xmlns="http://www.w3.org/2000/svg">
+	<title>gapa studio wordmark</title>
+	<defs>
+		<clipPath id="clip-g">
+			<rect x="86" y="0" width="0" height="310">
+				<animate attributeName="width" from="0" to="110" dur="0.42s" begin="0.2s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.42 0 0.58 1"/>
+			</rect>
+		</clipPath>
+		<clipPath id="clip-a1">
+			<rect x="184" y="0" width="0" height="310">
+				<animate attributeName="width" from="0" to="96" dur="0.38s" begin="0.56s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.42 0 0.58 1"/>
+			</rect>
+		</clipPath>
+		<clipPath id="clip-p">
+			<rect x="262" y="0" width="0" height="310">
+				<animate attributeName="width" from="0" to="86" dur="0.38s" begin="0.88s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.42 0 0.58 1"/>
+			</rect>
+		</clipPath>
+		<clipPath id="clip-a2">
+			<rect x="344" y="0" width="0" height="310">
+				<animate attributeName="width" from="0" to="94" dur="0.38s" begin="1.2s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.42 0 0.58 1"/>
+			</rect>
+		</clipPath>
+	</defs>
+
+	<g clip-path="url(#clip-g)">
+		<path fill="#f0ece4" d="M 86,80 C 86,52 106,32 138,30 C 164,28 188,44 196,68 L 196,90 L 160,90 L 160,76 C 157,64 148,58 138,60 C 122,62 114,74 114,92 C 114,110 124,124 140,126 C 154,128 166,120 170,108 L 196,108 L 196,160 C 196,190 174,210 144,212 C 114,214 92,196 90,172 L 116,168 C 118,182 128,190 144,188 C 158,186 168,176 168,162 L 168,130 C 158,138 146,142 134,140 C 106,136 86,112 86,80 Z"/>
+	</g>
+
+	<g clip-path="url(#clip-a1)">
+		<path fill="#f0ece4" d="M 200,32 C 222,22 256,36 264,66 C 272,94 260,126 238,138 C 220,148 194,144 184,126 L 184,44 C 186,38 193,34 200,32 Z M 216,56 C 204,62 200,78 200,96 C 200,112 208,124 220,126 C 234,128 244,116 246,100 C 248,82 240,62 228,56 C 224,53 220,53 216,56 Z"/>
+		<path fill="#f0ece4" d="M 262,32 C 272,30 280,34 280,42 L 280,168 C 280,176 272,178 262,176 L 262,32 Z"/>
+	</g>
+
+	<g clip-path="url(#clip-p)">
+		<path fill="#f0ece4" d="M 280,32 C 304,24 338,36 348,66 C 356,90 346,122 324,134 C 306,144 282,140 276,124 L 276,44 C 276,38 278,34 280,32 Z M 300,54 C 288,60 284,76 284,94 C 284,110 292,122 304,124 C 318,126 330,114 332,98 C 334,80 326,62 314,56 C 309,53 304,52 300,54 Z"/>
+		<path fill="#f0ece4" d="M 262,138 C 260,146 260,220 262,228 C 264,234 272,236 280,234 L 280,138 Z"/>
+	</g>
+
+	<g clip-path="url(#clip-a2)">
+		<path fill="#f0ece4" d="M 356,32 C 380,22 414,36 422,66 C 430,94 418,126 396,138 C 378,148 352,144 344,128 L 344,44 C 346,38 350,34 356,32 Z M 376,56 C 364,62 360,78 360,96 C 360,112 368,124 380,126 C 394,128 404,116 406,100 C 408,82 400,62 388,56 C 384,53 380,53 376,56 Z"/>
+		<path fill="#f0ece4" d="M 420,32 C 430,30 438,34 438,42 L 438,168 C 438,176 430,178 420,176 L 420,32 Z"/>
+	</g>
+
+	<g opacity="0">
+		<animate attributeName="opacity" from="0" to="1" dur="0.35s" begin="1.52s" fill="freeze"/>
+		<text x="438" y="258" text-anchor="end" fill="#f0ece4" font-family="sans-serif" font-size="11" font-weight="300">studio</text>
+	</g>
 </svg>

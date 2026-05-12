@@ -218,11 +218,20 @@ body.intro-complete .landing-screen {
 @keyframes logo-pulse {
   0%, 100% {
     opacity: 1;
-    transform: scale(1);
   }
   50% {
     opacity: 0.85;
-    transform: scale(1.03);
+  }
+}
+
+@keyframes logo-outro-right {
+  0% {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+  100% {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
   }
 }
 
@@ -251,6 +260,10 @@ body.intro-complete .landing-screen {
 
 .logo-top .landing-logo {
   transform: translateY(0);
+}
+
+body.intro-idle-outro .landing-logo {
+  animation: logo-outro-right 900ms cubic-bezier(0.7, 0, 0.2, 1) forwards;
 }
 
 .logo-bottom .landing-logo {
@@ -1772,8 +1785,32 @@ body.route-showreel .project-stage-mobile-backdrop {
     padding: 14.4px;
     background: transparent;
     animation: none;
-    transform: scale(0.9);
+    transform: none;
     transform-origin: top center;
+  }
+
+  .project-item .project-index {
+    font-size: 0.82rem;
+  }
+
+  .project-item .project-title {
+    font-size: 0.82rem;
+  }
+
+  .project-item.highlight-1 .project-title {
+    font-size: 0.82rem;
+  }
+
+  .project-item.highlight-2 .project-title {
+    font-size: 0.82rem;
+  }
+
+  .project-item.highlight-3 .project-title {
+    font-size: 0.82rem;
+  }
+
+  .project-item .project-meta-line {
+    font-size: 0.82rem;
   }
 
   /* Keep mobile backdrop truly viewport-fixed (not list-fixed) */
@@ -1913,7 +1950,7 @@ body.route-showreel .project-stage-mobile-backdrop {
 
   .logo-top,
   .logo-bottom {
-    width: 90%;
+    width: 80%;
     height: auto;
   }
 
