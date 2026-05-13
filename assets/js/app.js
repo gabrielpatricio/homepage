@@ -1,4 +1,7 @@
 (() => {
+  const INTRO_LOGO_HANDWRITING_MS = 1900;
+  const INTRO_LOGO_LOAD_TIMEOUT_MS = 7000;
+
   const data = window.PORTFOLIO_DATA;
   const galleryTracks = window.GALLERY_TRACKS || [];
   let youTubeApiPromise = null;
@@ -183,9 +186,51 @@
     if (state.introIdleTimer) {
       window.clearTimeout(state.introIdleTimer);
     }
-    state.introIdleTimer = window.setTimeout(() => {
-      playIntro({ auto: true });
-    }, 3000);
+    waitForIntroLogoHandwriting().then(() => {
+      if (state.introPlayed) return;
+
+      state.introIdleTimer = window.setTimeout(() => {
+        playIntro({ auto: true });
+      }, 3000);
+    });
+  }
+
+  function waitForIntroLogoHandwriting() {
+    const landingLogos = Array.from(document.querySelectorAll(".landing-logo"));
+    if (!landingLogos.length) return Promise.resolve();
+
+    const logoReadyJobs = landingLogos.map((logo) => waitForImageReady(logo, INTRO_LOGO_LOAD_TIMEOUT_MS));
+    return Promise.allSettled(logoReadyJobs).then(() => wait(INTRO_LOGO_HANDWRITING_MS));
+  }
+
+  function waitForImageReady(img, timeoutMs) {
+    return new Promise((resolve) => {
+      if (!img) {
+        resolve();
+        return;
+      }
+
+      const canUseCurrent = img.currentSrc || img.src;
+      if (img.complete && img.naturalWidth > 0 && canUseCurrent) {
+        resolve();
+        return;
+      }
+
+      let settled = false;
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timeoutId);
+        img.removeEventListener("load", finish);
+        img.removeEventListener("error", finish);
+        resolve();
+      };
+
+      img.addEventListener("load", finish);
+      img.addEventListener("error", finish);
+
+      const timeoutId = window.setTimeout(finish, timeoutMs);
+    });
   }
 
   function preloadIntroAssets() {
@@ -2737,7 +2782,7 @@
     state.gallery.cardNodes = new Map();
     els.photoStage.innerHTML = "";
     resetGalleryTrackQueue();
-    els.albumName.textContent = "—";
+    els.albumName.textContent = "";
     els.albumDetails.textContent = "";
     renderGallery();
     startGalleryAlbum(getNextAlbumIndex());
@@ -2776,7 +2821,7 @@
     state.gallery.currentIndex = -1;
     state.gallery.cardNodes = new Map();
     els.photoStage.innerHTML = "";
-    els.albumName.textContent = "—";
+    els.albumName.textContent = "";
   }
 
   function clearGalleryTimers() {
@@ -3093,7 +3138,7 @@
 
   function updateAlbumName() {
     const current = state.gallery.flatImages[state.gallery.currentIndex];
-    els.albumName.textContent = current?.albumName || "—";
+    els.albumName.textContent = current?.albumName || "";
     els.albumDetails.textContent = current?.albumDetails || "";
   }
 
