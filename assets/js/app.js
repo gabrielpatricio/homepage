@@ -2782,7 +2782,7 @@
     state.gallery.cardNodes = new Map();
     els.photoStage.innerHTML = "";
     resetGalleryTrackQueue();
-    els.albumName.textContent = "";
+    els.albumName.textContent = "—";
     els.albumDetails.textContent = "";
     renderGallery();
     startGalleryAlbum(getNextAlbumIndex());
@@ -2821,7 +2821,7 @@
     state.gallery.currentIndex = -1;
     state.gallery.cardNodes = new Map();
     els.photoStage.innerHTML = "";
-    els.albumName.textContent = "";
+    els.albumName.textContent = "—";
   }
 
   function clearGalleryTimers() {
@@ -3138,7 +3138,7 @@
 
   function updateAlbumName() {
     const current = state.gallery.flatImages[state.gallery.currentIndex];
-    els.albumName.textContent = current?.albumName || "";
+    els.albumName.textContent = current?.albumName || "—";
     els.albumDetails.textContent = current?.albumDetails || "";
   }
 
