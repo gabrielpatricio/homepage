@@ -2664,10 +2664,12 @@
 
   function getVideoOrientations(project, count) {
     const defaults = Array.from({ length: count }, () => "horizontal");
-    if (!Array.isArray(project.videoOrientation)) return defaults;
+    const singleOrientation = String(project.orientation || project.videoOrientation || "").trim().toLowerCase();
+    const orientationList = Array.isArray(project.videoOrientation) ? project.videoOrientation : null;
 
     return defaults.map((fallback, index) => {
-      const raw = String(project.videoOrientation[index] || "").trim().toLowerCase();
+      const rawValue = orientationList ? orientationList[index] : singleOrientation;
+      const raw = String(rawValue || "").trim().toLowerCase();
       if (raw.startsWith("v")) return "vertical";
       if (raw.startsWith("h")) return "horizontal";
       return fallback;

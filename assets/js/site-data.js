@@ -675,6 +675,32 @@ window.PORTFOLIO_DATA = {
         "assets/media/projects/metaview-interview/stills/1.jpeg",
       ]
     },
+    {
+      slug: "healthyfeaks-hoka",
+      title: "healthy freaks - powered by HOKA",
+      role: "Videographer / Editor",
+      year: "2026",
+      type: "Social Media Brand Content",
+      orientation: "vertical",
+      hideStills: true,
+      categories: ["Social Media Brand Content", "Visual Storytelling"],
+      highlight: 1,
+      duration: "01:00",
+      client: "Healthy Freaks",
+      subtitle: "",
+      description: "A 1-minute promotional video for Healthy Freaks, powered by HOKA. I worked as Videographer and Editor pairing with Kirian Dhyan Hirsiger, capturing dynamic shots and crafting a compelling visual narrative.",
+      credits: [
+        "Camera - Gabriel Patrício & Kirian Hirsiger",
+        "Editor - Gabriel Patrício & Kirian Hirsiger"
+      ],
+     videoEmbed: "https://player.vimeo.com/video/1192429653?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&autoplay=1",
+      stills: [
+        "assets/media/projects/healthyfeaks-hoka/stills/1.png",
+        "assets/media/projects/healthyfeaks-hoka/stills/2.png",
+        "assets/media/projects/healthyfeaks-hoka/stills/3.png",
+        "assets/media/projects/healthyfeaks-hoka/stills/5.png"    
+      ]
+    },
   ],
 
   photoAlbums: (window.PHOTO_ALBUMS || []).map((album) => ({

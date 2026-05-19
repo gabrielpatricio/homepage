@@ -768,6 +768,14 @@ body.route-showreel .project-stage-mobile-backdrop {
   max-height: none;
 }
 
+@media (min-width: 861px) {
+  .project-panel:not(.is-full-page):not(.is-chapter-page) .project-video-grid[data-video-count="1"] .video-shell[data-orientation="vertical"] {
+    width: min(42vh, 420px);
+    max-width: 100%;
+    justify-self: center;
+  }
+}
+
 .project-video-grid[data-video-count="1"] {
   grid-template-columns: minmax(0, 1fr);
 }
