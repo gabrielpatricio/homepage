@@ -711,7 +711,6 @@
     state.projectNodeMap.clear();
     const renderableProjects = data.projects.filter((project) => !project.hidden);
 
-    renderMobileProjectBackdrop();
     renderDesktopProjectBackdrop();
 
     if (window.innerWidth <= 860) {
@@ -1469,7 +1468,9 @@
       closeAllOverlays();
       const showreelBackdropSources = collectMobileBackdropSources();
       state.mobileProjectBackdropSources = showreelBackdropSources;
-      state.mobileProjectBackdropIndex = 0;
+      state.mobileProjectBackdropIndex = showreelBackdropSources.length > 1
+        ? Math.floor(Math.random() * showreelBackdropSources.length)
+        : 0;
       document.body.classList.add("route-showreel");
       stopGallery();
       renderMobileProjectBackdrop();
