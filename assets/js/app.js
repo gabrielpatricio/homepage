@@ -1,6 +1,7 @@
 (() => {
   const INTRO_LOGO_HANDWRITING_MS = 1900;
   const INTRO_LOGO_LOAD_TIMEOUT_MS = 7000;
+  const DESKTOP_BACKDROP_VIMEO_QUALITY = "240p";
 
   const data = window.PORTFOLIO_DATA;
   const galleryTracks = window.GALLERY_TRACKS || [];
@@ -24,10 +25,16 @@
     projectNodeMap: new Map(),
     orientationLockAttempted: false,
     projectSeeMoreGestureCleanup: null,
-    mobileProjectBackdropSrc: "",
+    mobileProjectBackdropSources: [],
+    mobileProjectBackdropIndex: 0,
     mobileBackdropScrollRaf: null,
     mobileBackdropKeepAliveTimer: null,
+    mobileBackdropCycleTimer: null,
     mobileAutoplayUnlockDone: false,
+    desktopBackdropKeepAliveTimer: null,
+    desktopBackdropBuildTimers: [],
+    desktopBackdropLayoutSeed: "",
+    desktopBackdropLayoutSignature: "",
     gallery: {
       flatImages: [],
       albumRanges: [],
@@ -309,6 +316,17 @@
     const compressedSrc = getCompressedStillSrc(src);
     img.src = compressedSrc;
     img.addEventListener("error", () => {
+      const folder = window.innerWidth <= 860 ? "mobile" : "compressed";
+      const normalized = String(src);
+      const siblingVariant = normalized.includes("/stills/")
+        ? normalized.replace("/stills/", `/${folder}/`)
+        : src;
+
+      if (img.src !== new URL(siblingVariant, window.location.href).toString() && siblingVariant !== src) {
+        img.src = siblingVariant;
+        return;
+      }
+
       if (img.src !== new URL(src, window.location.href).toString()) {
         img.src = src;
       }
@@ -402,6 +420,7 @@
     window.addEventListener("resize", debounce(() => {
       renderProjects();
       queueMobileBackdropScrollSync();
+      ensureDesktopBackdropPlayback();
       syncOrientationGuard();
       attemptPortraitOrientationLock();
     }, 120));
@@ -420,6 +439,9 @@
         syncOrientationGuard();
         attemptPortraitOrientationLock();
         ensureMobileBackdropPlayback();
+        ensureDesktopBackdropPlayback();
+      } else {
+        ensureDesktopBackdropPlayback();
       }
     });
     window.addEventListener("keydown", handleGalleryKeydown);
@@ -501,16 +523,18 @@
     // iPhone project videos are intentionally manual-play; do not force autoplay.
     if (isIPhoneDevice()) return;
 
-    state.chapterPlayers.forEach((player) => {
-      player.setMuted(true).catch(() => {});
-      player.play().catch(() => {});
-    });
+    // Keep mobile unlock predictable: only nudge the first project video,
+    // instead of forcing all project videos to play at once.
+    const firstChapterPlayer = state.chapterPlayers[0];
+    if (firstChapterPlayer) {
+      firstChapterPlayer.setMuted(true).catch(() => {});
+      firstChapterPlayer.play().catch(() => {});
+    }
 
-    state.customVideoControllers.forEach((controller) => {
-      if (controller && typeof controller.play === "function") {
-        controller.play();
-      }
-    });
+    const firstController = state.customVideoControllers[0];
+    if (firstController && typeof firstController.play === "function") {
+      firstController.play();
+    }
   }
 
   function resumeMobileBackdropMuted() {
@@ -541,6 +565,26 @@
     state.mobileBackdropKeepAliveTimer = null;
   }
 
+  function stopMobileBackdropCycle() {
+    if (!state.mobileBackdropCycleTimer) return;
+    window.clearTimeout(state.mobileBackdropCycleTimer);
+    state.mobileBackdropCycleTimer = null;
+  }
+
+  function stopDesktopBackdropKeepAlive() {
+    if (!state.desktopBackdropKeepAliveTimer) return;
+    window.clearInterval(state.desktopBackdropKeepAliveTimer);
+    state.desktopBackdropKeepAliveTimer = null;
+  }
+
+  function clearDesktopBackdropBuildTimers() {
+    if (!state.desktopBackdropBuildTimers.length) return;
+    state.desktopBackdropBuildTimers.forEach((timerId) => {
+      window.clearTimeout(timerId);
+    });
+    state.desktopBackdropBuildTimers = [];
+  }
+
   function ensureMobileBackdropPlayback() {
     const isMobile = window.innerWidth <= 860;
     const onShowreelRoute = location.hash.replace(/^#/, "").split("/")[0] === "showreel";
@@ -548,6 +592,7 @@
 
     if (!isMobile || !onShowreelRoute || !hasBackdropFrame || document.hidden) {
       stopMobileBackdropKeepAlive();
+      stopMobileBackdropCycle();
       return;
     }
 
@@ -563,6 +608,31 @@
       }
       resumeMobileBackdropMuted();
     }, 900);
+  }
+
+  function scheduleMobileBackdropCycle() {
+    stopMobileBackdropCycle();
+
+    if (window.innerWidth > 860 || state.mobileProjectBackdropSources.length <= 1) return;
+    if (location.hash.replace(/^#/, "").split("/")[0] !== "showreel") return;
+    if (document.hidden) return;
+
+    state.mobileBackdropCycleTimer = window.setTimeout(() => {
+      const frame = els.showreel?.querySelector(".project-stage-mobile-backdrop__frame");
+      if (!frame || state.mobileProjectBackdropSources.length <= 1) return;
+
+      state.mobileProjectBackdropIndex =
+        (state.mobileProjectBackdropIndex + 1) % state.mobileProjectBackdropSources.length;
+      const nextEntry = state.mobileProjectBackdropSources[state.mobileProjectBackdropIndex];
+      const nextSrc = nextEntry?.src || "";
+      if (!nextSrc) return;
+
+      frame.classList.remove("is-loaded");
+      frame.classList.toggle("is-vertical", nextEntry?.orientation === "vertical");
+      window.setTimeout(() => {
+        frame.src = nextSrc;
+      }, 180);
+    }, 8200);
   }
 
   async function playIntro(options = {}) {
@@ -642,6 +712,7 @@
     const renderableProjects = data.projects.filter((project) => !project.hidden);
 
     renderMobileProjectBackdrop();
+    renderDesktopProjectBackdrop();
 
     if (window.innerWidth <= 860) {
       const mobileProjects = [...renderableProjects].reverse();
@@ -662,9 +733,9 @@
       width: els.projectStage.clientWidth || window.innerWidth,
       height: window.innerHeight,
       minX: sidebarRight,
-      minY: 20,
-      maxX: (els.projectStage.clientWidth || window.innerWidth) - 250,
-      maxY: window.innerHeight - 140
+      minY: 25,
+      maxX: (els.projectStage.clientWidth || window.innerWidth) - 80,
+      maxY: window.innerHeight - 60
     };
 
     const placed = [];
@@ -688,11 +759,372 @@
     updateProjectVisibility();
   }
 
+  function shouldEnableDesktopBackdrop() {
+    if (window.innerWidth <= 860 || !els.showreel) return false;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
+
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (connection?.saveData) return false;
+
+    return true;
+  }
+
+  function getDesktopBackdropGridSpec(minCells = 6) {
+    const cols = Math.max(2, Math.ceil(window.innerWidth / 550));
+    let rows = Math.max(2, Math.ceil(window.innerHeight / 450));
+
+    if (cols * rows < minCells) {
+      rows = Math.ceil(minCells / cols);
+    }
+
+    return {
+      cols,
+      rows,
+      cells: cols * rows
+    };
+  }
+
+  function pickRandomIndexes(total, count) {
+    const pool = Array.from({ length: total }, (_, idx) => idx);
+    for (let i = pool.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    return pool.slice(0, count);
+  }
+
+  function getDesktopBackdropLayoutSeed() {
+    if (state.desktopBackdropLayoutSeed) return state.desktopBackdropLayoutSeed;
+
+    const storageKey = "desktopBackdropLayoutSeed";
+    let seed = "";
+
+    try {
+      seed = sessionStorage.getItem(storageKey) || "";
+    } catch (_) {
+      // Ignore storage access errors.
+    }
+
+    if (!seed) {
+      seed = `${Date.now()}-${Math.random()}`;
+      try {
+        sessionStorage.setItem(storageKey, seed);
+      } catch (_) {
+        // Ignore storage write errors.
+      }
+    }
+
+    state.desktopBackdropLayoutSeed = seed;
+    return seed;
+  }
+
+  function buildSeededRandom(seed) {
+    let h = 2166136261;
+    const source = String(seed || "seed");
+    for (let i = 0; i < source.length; i += 1) {
+      h ^= source.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+
+    return function nextRandom() {
+      h += 0x6d2b79f5;
+      let t = Math.imul(h ^ (h >>> 15), 1 | h);
+      t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function pickSeededRandomIndexes(total, count, seed) {
+    const pool = Array.from({ length: total }, (_, idx) => idx);
+    const rand = buildSeededRandom(seed);
+
+    for (let i = pool.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(rand() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+
+    return pool.slice(0, count);
+  }
+
+  function buildDesktopBackdropVideoUrl(rawUrl) {
+    const normalized = normalizeEmbedUrl(rawUrl, {
+      autoplay: true,
+      muted: true,
+      customUI: true,
+      suppressNativeControls: true
+    });
+
+    if (!normalized) return "";
+
+    try {
+      const parsed = new URL(normalized, window.location.href);
+      const host = parsed.hostname.toLowerCase();
+      parsed.searchParams.set("autoplay", "1");
+      parsed.searchParams.set("muted", "1");
+      parsed.searchParams.set("mute", "1");
+      parsed.searchParams.set("playsinline", "1");
+      parsed.searchParams.set("loop", "1");
+      parsed.searchParams.set("autopause", "0");
+
+      if (host.includes("youtube.com") || host.includes("youtu.be")) {
+        const videoId = extractYouTubeVideoId(normalized) || extractYouTubeVideoId(rawUrl);
+        if (videoId) {
+          parsed.searchParams.set("playlist", videoId);
+        }
+      }
+
+      if (host.includes("vimeo.com")) {
+        parsed.searchParams.set("background", "1");
+        parsed.searchParams.set("quality", DESKTOP_BACKDROP_VIMEO_QUALITY);
+        parsed.searchParams.set("max_quality", DESKTOP_BACKDROP_VIMEO_QUALITY);
+      }
+
+      return parsed.toString();
+    } catch (_) {
+      return normalized;
+    }
+  }
+
+  function collectDesktopBackdropEmbeds() {
+    const uniqueUrls = new Set();
+    const urls = [];
+
+    data.projects.forEach((project) => {
+      if (project.hidden || project.chapterPage || project.fullPage) return;
+      const embeds = Array.isArray(project.videoEmbed) ? project.videoEmbed : [project.videoEmbed];
+
+      embeds.forEach((embedUrl) => {
+        if (!embedUrl) return;
+        if (detectVideoProvider(embedUrl) !== "vimeo") return;
+        const backdropUrl = buildDesktopBackdropVideoUrl(embedUrl);
+        if (backdropUrl && !uniqueUrls.has(backdropUrl)) {
+          uniqueUrls.add(backdropUrl);
+          urls.push(backdropUrl);
+        }
+      });
+    });
+
+    return urls;
+  }
+
+  function setDesktopBackdropFramesActive(isActive) {
+    const frames = els.showreel?.querySelectorAll(".project-stage-desktop-backdrop__frame") || [];
+
+    frames.forEach((frame) => {
+      const source = frame.dataset.src || "";
+      if (!source) return;
+      const tile = frame.closest(".project-stage-desktop-backdrop__tile");
+
+      if (isActive) {
+        if (frame.getAttribute("src") !== source) {
+          frame.classList.remove("is-loaded");
+          tile?.classList.remove("is-loaded");
+          frame.src = source;
+        }
+      } else if (frame.getAttribute("src")) {
+        frame.removeAttribute("src");
+        frame.classList.remove("is-loaded");
+        tile?.classList.remove("is-loaded");
+      }
+    });
+  }
+
+  function resumeDesktopBackdropMuted() {
+    const frames = els.showreel?.querySelectorAll(".project-stage-desktop-backdrop__frame") || [];
+
+    frames.forEach((frame) => {
+      const src = (frame.dataset.src || frame.getAttribute("src") || "").toLowerCase();
+      const win = frame.contentWindow;
+      if (!win || !src) return;
+
+      try {
+        if (src.includes("youtube.com") || src.includes("youtu.be")) {
+          win.postMessage('{"event":"command","func":"mute","args":""}', "*");
+          win.postMessage('{"event":"command","func":"playVideo","args":""}', "*");
+        } else if (src.includes("vimeo.com")) {
+          win.postMessage('{"method":"setMuted","value":true}', "*");
+          win.postMessage('{"method":"play"}', "*");
+        }
+      } catch (_) {
+        // Ignore cross-origin command issues.
+      }
+    });
+  }
+
+  function isShowreelRouteActive() {
+    const route = location.hash.replace(/^#/, "").split("/")[0];
+    if (route === "showreel") return true;
+    if (!route && document.body.classList.contains("route-showreel")) return true;
+    return false;
+  }
+
+  function ensureDesktopBackdropPlayback() {
+    const onShowreelRoute = isShowreelRouteActive();
+    const hasDesktopBackdrop = Boolean(els.showreel?.querySelector(".project-stage-desktop-backdrop"));
+
+    if (!shouldEnableDesktopBackdrop() || !onShowreelRoute || !hasDesktopBackdrop || document.hidden) {
+      setDesktopBackdropFramesActive(false);
+      stopDesktopBackdropKeepAlive();
+      return;
+    }
+
+    setDesktopBackdropFramesActive(true);
+    resumeDesktopBackdropMuted();
+
+    if (state.desktopBackdropKeepAliveTimer) return;
+    state.desktopBackdropKeepAliveTimer = window.setInterval(() => {
+      const stillOnShowreel = isShowreelRouteActive();
+      const stillDesktop = window.innerWidth > 860;
+      if (!stillOnShowreel || !stillDesktop || document.hidden) {
+        stopDesktopBackdropKeepAlive();
+        setDesktopBackdropFramesActive(false);
+        return;
+      }
+      resumeDesktopBackdropMuted();
+    }, 2500);
+  }
+
+  function renderDesktopProjectBackdrop() {
+    if (!shouldEnableDesktopBackdrop()) {
+      state.desktopBackdropLayoutSignature = "";
+      clearDesktopBackdropBuildTimers();
+      const existingShell = els.showreel?.querySelector(".project-stage-desktop-backdrop");
+      if (existingShell) existingShell.remove();
+      stopDesktopBackdropKeepAlive();
+      return;
+    }
+
+    const embeds = collectDesktopBackdropEmbeds();
+    if (!embeds.length) {
+      state.desktopBackdropLayoutSignature = "";
+      clearDesktopBackdropBuildTimers();
+      const existingShell = els.showreel?.querySelector(".project-stage-desktop-backdrop");
+      if (existingShell) existingShell.remove();
+      stopDesktopBackdropKeepAlive();
+      return;
+    }
+
+    const grid = getDesktopBackdropGridSpec();
+    const layoutSeed = getDesktopBackdropLayoutSeed();
+    const nextSignature = `${grid.cols}x${grid.rows}|${embeds.join("|")}`;
+    const existing = els.showreel?.querySelector(".project-stage-desktop-backdrop");
+
+    if (existing && state.desktopBackdropLayoutSignature === nextSignature) {
+      ensureDesktopBackdropPlayback();
+      return;
+    }
+
+    clearDesktopBackdropBuildTimers();
+    if (existing) existing.remove();
+    state.desktopBackdropLayoutSignature = nextSignature;
+
+    const shell = document.createElement("div");
+    shell.className = "project-stage-desktop-backdrop";
+    shell.setAttribute("aria-hidden", "true");
+
+    const track = document.createElement("div");
+    track.className = "project-stage-desktop-backdrop__track";
+    track.style.gridTemplateColumns = `repeat(${grid.cols}, minmax(0, 1fr))`;
+    track.style.gridTemplateRows = `repeat(${grid.rows}, minmax(0, 1fr))`;
+    shell.appendChild(track);
+
+    const tiles = [];
+    for (let i = 0; i < grid.cells; i += 1) {
+      const tile = document.createElement("div");
+      tile.className = "project-stage-desktop-backdrop__tile";
+      track.appendChild(tile);
+      tiles.push(tile);
+    }
+
+    const videoCount = Math.min(embeds.length, tiles.length);
+    const targetIndexes = pickSeededRandomIndexes(
+      tiles.length,
+      videoCount,
+      `${layoutSeed}|${nextSignature}`
+    );
+    const revealPending = [];
+    let revealInProgress = false;
+    const REVEAL_GAP_MS = 220;
+    const REVEAL_FALLBACK_MS = 900;
+
+    function pumpBackdropRevealQueue() {
+      if (revealInProgress || revealPending.length === 0) return;
+      revealInProgress = true;
+      const next = revealPending.shift();
+      if (!next) {
+        revealInProgress = false;
+        return;
+      }
+
+      const { tile, frame } = next;
+      let settled = false;
+      const settle = () => {
+        if (settled) return;
+        settled = true;
+        window.setTimeout(() => {
+          revealInProgress = false;
+          pumpBackdropRevealQueue();
+        }, REVEAL_GAP_MS);
+      };
+
+      const onTransitionEnd = (event) => {
+        if (event.target !== tile || event.propertyName !== "opacity") return;
+        tile.removeEventListener("transitionend", onTransitionEnd);
+        settle();
+      };
+
+      tile.addEventListener("transitionend", onTransitionEnd);
+      window.setTimeout(() => {
+        tile.removeEventListener("transitionend", onTransitionEnd);
+        settle();
+      }, REVEAL_FALLBACK_MS);
+
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          tile.classList.add("is-loaded");
+          frame.classList.add("is-loaded");
+        });
+      });
+      resumeDesktopBackdropMuted();
+    }
+
+    embeds.slice(0, videoCount).forEach((embedUrl, index) => {
+      const timerId = window.setTimeout(() => {
+        const tile = tiles[targetIndexes[index]];
+        if (!tile) return;
+        tile.classList.add("is-video");
+
+        const frame = document.createElement("iframe");
+        frame.className = "project-stage-desktop-backdrop__frame";
+        frame.title = `Background showreel clip ${index + 1}`;
+        frame.allow = "autoplay; fullscreen; picture-in-picture";
+        frame.setAttribute("allowfullscreen", "");
+        frame.setAttribute("playsinline", "");
+        frame.setAttribute("tabindex", "-1");
+        frame.setAttribute("loading", index < 4 ? "eager" : "lazy");
+        frame.dataset.src = embedUrl;
+        frame.addEventListener("load", () => {
+          revealPending.push({ tile, frame });
+          pumpBackdropRevealQueue();
+        });
+
+        tile.appendChild(frame);
+        frame.src = embedUrl;
+      }, 0);
+
+      state.desktopBackdropBuildTimers.push(timerId);
+    });
+
+    els.showreel.insertBefore(shell, els.projectStage);
+    ensureDesktopBackdropPlayback();
+  }
+
   function renderMobileProjectBackdrop() {
     const existing = els.showreel?.querySelector(".project-stage-mobile-backdrop");
     if (existing) existing.remove();
+    stopMobileBackdropCycle();
 
-    if (window.innerWidth > 860 || !state.mobileProjectBackdropSrc || !els.showreel) {
+    if (window.innerWidth > 860 || !state.mobileProjectBackdropSources.length || !els.showreel) {
       return;
     }
 
@@ -706,10 +1138,14 @@
     frame.setAttribute("allowfullscreen", "");
     frame.setAttribute("playsinline", "");
     frame.tabIndex = -1;
-    frame.src = state.mobileProjectBackdropSrc;
+    const activeEntry = state.mobileProjectBackdropSources[state.mobileProjectBackdropIndex] || null;
+    frame.classList.toggle("is-vertical", activeEntry?.orientation === "vertical");
+    frame.src = activeEntry?.src || "";
     frame.addEventListener("load", () => {
+      frame.classList.add("is-loaded");
       resumeMobileBackdropMuted();
       ensureMobileBackdropPlayback();
+      scheduleMobileBackdropCycle();
     });
 
     shell.appendChild(frame);
@@ -720,6 +1156,7 @@
     window.setTimeout(() => {
       resumeMobileBackdropMuted();
       ensureMobileBackdropPlayback();
+      scheduleMobileBackdropCycle();
     }, 500);
   }
 
@@ -791,6 +1228,8 @@
 
       if (host.includes("vimeo.com")) {
         parsed.searchParams.set("background", "1");
+        parsed.searchParams.set("quality", DESKTOP_BACKDROP_VIMEO_QUALITY);
+        parsed.searchParams.set("max_quality", DESKTOP_BACKDROP_VIMEO_QUALITY);
       }
 
       return parsed.toString();
@@ -799,21 +1238,30 @@
     }
   }
 
-  function updateMobileBackdropFromProject(project) {
-    if (window.innerWidth > 860 || !project || project.chapterPage || project.fullPage) {
-      return;
-    }
+  function collectMobileBackdropSources() {
+    const uniqueUrls = new Set();
+    const entries = [];
 
-    const embeds = Array.isArray(project.videoEmbed)
-      ? project.videoEmbed
-      : [project.videoEmbed];
-    const firstEmbed = embeds.find(Boolean);
-    if (!firstEmbed) return;
+    data.projects.forEach((project) => {
+      if (project.hidden || project.chapterPage || project.fullPage) return;
+      const embeds = Array.isArray(project.videoEmbed) ? project.videoEmbed : [project.videoEmbed];
+      const orientations = getVideoOrientations(project, embeds.length);
 
-    const backdropUrl = buildMobileBackdropVideoUrl(firstEmbed);
-    if (!backdropUrl) return;
+      embeds.forEach((embedUrl, index) => {
+        if (!embedUrl) return;
+        if (detectVideoProvider(embedUrl) !== "vimeo") return;
+        const backdropUrl = buildMobileBackdropVideoUrl(embedUrl);
+        if (backdropUrl && !uniqueUrls.has(backdropUrl)) {
+          uniqueUrls.add(backdropUrl);
+          entries.push({
+            src: backdropUrl,
+            orientation: orientations[index] === "vertical" ? "vertical" : "horizontal"
+          });
+        }
+      });
+    });
 
-    state.mobileProjectBackdropSrc = backdropUrl;
+    return entries;
   }
 
   function updateProjectVisibility() {
@@ -1018,16 +1466,22 @@
     }
 
     if (route === "showreel") {
-      closeAllOverlays({ keepBackdropFromCurrentProject: true });
+      closeAllOverlays();
+      const showreelBackdropSources = collectMobileBackdropSources();
+      state.mobileProjectBackdropSources = showreelBackdropSources;
+      state.mobileProjectBackdropIndex = 0;
       document.body.classList.add("route-showreel");
       stopGallery();
       renderMobileProjectBackdrop();
       ensureMobileBackdropPlayback();
+      ensureDesktopBackdropPlayback();
       return;
     }
 
     if (route === "35mm") {
       stopMobileBackdropKeepAlive();
+      stopMobileBackdropCycle();
+      stopDesktopBackdropKeepAlive();
       closeAllOverlays();
       els.galleryOverlay.classList.add("active");
       els.galleryOverlay.setAttribute("aria-hidden", "false");
@@ -1039,6 +1493,8 @@
 
     if (route === "about") {
       stopMobileBackdropKeepAlive();
+      stopMobileBackdropCycle();
+      stopDesktopBackdropKeepAlive();
       closeAllOverlays();
       els.aboutOverlay.classList.add("active");
       els.aboutOverlay.setAttribute("aria-hidden", "false");
@@ -1052,6 +1508,8 @@
       const project = data.projects.find((item) => item.slug === slug && !item.hidden);
       if (project) {
         stopMobileBackdropKeepAlive();
+        stopMobileBackdropCycle();
+        stopDesktopBackdropKeepAlive();
         closeAllOverlays();
         populateProjectOverlay(project);
         els.projectOverlay.classList.add("active");
@@ -1066,9 +1524,7 @@
     location.hash = "#showreel";
   }
 
-  function closeAllOverlays(options = {}) {
-    const wasProjectOverlayActive = els.projectOverlay.classList.contains("active");
-    const lastProject = state.currentProject;
+  function closeAllOverlays() {
 
     closeProjectStillViewer();
     unlockPageScroll();
@@ -1147,14 +1603,12 @@
     const closeMetaBtn = els.projectMeta.querySelector(".close-meta");
     if (closeMetaBtn) closeMetaBtn.remove();
 
-    if (options.keepBackdropFromCurrentProject && wasProjectOverlayActive) {
-      updateMobileBackdropFromProject(lastProject);
-    } else {
-      state.mobileProjectBackdropSrc = "";
-    }
+    state.mobileProjectBackdropSources = [];
+    state.mobileProjectBackdropIndex = 0;
 
     renderMobileProjectBackdrop();
     ensureMobileBackdropPlayback();
+    ensureDesktopBackdropPlayback();
   }
 
   function populateProjectOverlay(project) {
@@ -1206,13 +1660,16 @@
       const shouldUseCustomUi = !isChapterPage && (provider === "vimeo" || provider === "youtube");
       const isIPhone = isIPhoneDevice();
       const isMobileDevice = window.innerWidth <= 860;
-      // For full-page mobile projects, only the first video should autoplay on load
-      const shouldAutoplayBase = (isChapterPage && !isMobileDevice) || (shouldUseCustomUi && !isFullPage) || (isFullPage && window.innerWidth > 640) || (isFullPage && window.innerWidth <= 640 && index === 0);
-      const shouldAutoplay = isIPhone ? false : shouldAutoplayBase;
-      // iOS Safari only allows autoplay when the iframe URL has muted=1; force it on mobile
+      const shouldAutoplayDesktop =
+        (isChapterPage && !isMobileDevice)
+        || (shouldUseCustomUi && !isFullPage)
+        || (isFullPage && window.innerWidth > 640);
+      // Unified mobile policy: only the first project video may autoplay.
+      const shouldAutoplay = isIPhone ? false : (isMobileDevice ? index === 0 : shouldAutoplayDesktop);
+      const shouldStartMuted = isIPhone ? false : (isMobileDevice ? true : index !== 0);
       const videoUrl = normalizeEmbedUrl(rawUrl, {
         autoplay: shouldAutoplay,
-        muted: shouldAutoplay ? (index !== 0 || isMobileDevice) : false,
+        muted: shouldStartMuted,
         customUI: !isChapterPage && (provider === "vimeo" || provider === "youtube"),
         suppressNativeControls: isChapterPage
       });
@@ -1246,7 +1703,7 @@
         const isMobileChapterLayout = isMobileDevice;
         const showChapterMuteButton = true;
         const isFirstChapterVideo = index === 0;
-        const isMuted = isMobileChapterLayout ? true : (isIPhone ? true : (index !== 0));
+        const isMuted = shouldStartMuted;
         const ps = { paused: true, muted: isMuted };
         let mobileControlsHideTimer = null;
         const player = new Vimeo.Player(frame);
@@ -1255,7 +1712,7 @@
         // Auto-start playback after player is ready
         player.ready().then(() => {
           player.setMuted(isMuted).then(() => {
-            if (isIPhone) return;
+            if (!shouldAutoplay) return;
             // Add a small delay before play attempt - helps on iOS
             return new Promise(resolve => setTimeout(resolve, 100)).then(() => player.play());
           }).catch((error) => {
@@ -1359,32 +1816,26 @@
           });
         }
       } else if (isChapterPage && provider === "youtube") {
-        const startMutedForMobile = isMobileDevice ? true : (isIPhone ? false : (index !== 0));
         const controller = createStandardVideoControls({
           shell,
           ratio,
           frame,
           provider,
-          autoPlay: !isMobileDevice && !isIPhone,
-          startMuted: startMutedForMobile,
+          autoPlay: shouldAutoplay,
+          startMuted: shouldStartMuted,
           forceUnmutedOnFirstPlay: isMobileDevice && index === 0
         });
         if (controller) {
           state.customVideoControllers.push(controller);
         }
       } else if (!isChapterPage) {
-        // For full-page mobile projects, autoplay only the first video initially
-        const shouldAutoPlayVideoBase = !isFullPage || window.innerWidth > 640 || (isFullPage && window.innerWidth <= 640 && index === 0);
-        const shouldAutoPlayVideo = isIPhone ? false : shouldAutoPlayVideoBase;
-        // On mobile start muted (iOS autoplay requirement); user can unmute via button
-        const startMutedForMobile = isIPhone ? false : (index !== 0 || (shouldAutoPlayVideo && window.innerWidth <= 860));
         const controller = createStandardVideoControls({
           shell,
           ratio,
           frame,
           provider,
-          autoPlay: shouldAutoPlayVideo,
-          startMuted: startMutedForMobile
+          autoPlay: shouldAutoplay,
+          startMuted: shouldStartMuted
         });
         if (controller) {
           state.customVideoControllers.push(controller);

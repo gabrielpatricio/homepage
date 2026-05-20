@@ -1,6 +1,5 @@
 window.GALLERY_TRACKS = [
   "assets/media/music/afterdark._spotdown.org.mp3",
-  "assets/media/music/Blue Hour_spotdown.org.mp3",
   "assets/media/music/Boring You Say_spotdown.org.mp3",
   "assets/media/music/Cielo Grande_spotdown.org.mp3",
   "assets/media/music/Colder Heavens - Acoustic Version_spotdown.org.mp3",

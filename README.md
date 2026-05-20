@@ -88,9 +88,6 @@ Each project supports:
 - `videoEmbed`
 - `stills`
 
-### `assets/media/logo-placeholder.png`
-Replace this with your real transparent PNG logo.
-
 ### `assets/media/avatar-placeholder.png`
 Replace this with your portrait for the About page.
 

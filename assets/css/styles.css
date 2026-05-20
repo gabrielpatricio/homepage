@@ -397,7 +397,7 @@ body.intro-complete .project-stage {
 .showreel-watermark {
   position: absolute;
   inset: 0;
-  background-image: url("../media/logo-placeholder.png");
+  background-image: url("../logo/gapa_smooth_fixed.svg");
   background-repeat: no-repeat;
   background-position: center;
   background-size: min(85vw, 1100px) auto;
@@ -474,6 +474,84 @@ body.intro-complete .project-stage {
   padding-top: 90px;
   padding-bottom: 70px;
   isolation: isolate;
+  z-index: 2;
+}
+
+.project-stage-desktop-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 340ms ease;
+}
+
+body.route-showreel .project-stage-desktop-backdrop {
+  opacity: 1;
+}
+
+.project-stage-desktop-backdrop::before,
+.project-stage-desktop-backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.project-stage-desktop-backdrop::before {
+  background:
+    radial-gradient(circle at 14% 18%, rgba(255, 255, 255, 0.15), transparent 54%),
+    radial-gradient(circle at 83% 68%, rgba(255, 255, 255, 0.1), transparent 56%);
+  mix-blend-mode: screen;
+}
+
+.project-stage-desktop-backdrop::after {
+  background: rgba(0, 0, 0, 0.48);
+}
+
+.project-stage-desktop-backdrop__track {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  gap: clamp(6px, 0.7vw, 12px);
+  padding: clamp(10px, 1vw, 16px);
+  transform: scale(1.03);
+}
+
+.project-stage-desktop-backdrop__tile {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 0;
+  overflow: hidden;
+  background: transparent;
+  border: 0;
+  opacity: 0;
+  transition: opacity 700ms ease;
+}
+
+.project-stage-desktop-backdrop__tile.is-video {
+  background: transparent;
+}
+
+.project-stage-desktop-backdrop__tile.is-loaded {
+  opacity: 1;
+}
+
+.project-stage-desktop-backdrop__frame {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  filter: blur(9px) saturate(0.86) brightness(0.72);
+  transform: scale(1.16);
+  opacity: 0;
+  transition: opacity 700ms ease;
+  mask-image: linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%);
+}
+
+.project-stage-desktop-backdrop__frame.is-loaded {
+  opacity: 0.7;
 }
 
 .project-stage-mobile-backdrop {
@@ -501,11 +579,25 @@ body.route-showreel .project-stage-mobile-backdrop {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 140vw;
-  height: 140vh;
+  width: 100vw;
+  height: min(56.25vw, 100vh);
   border: 0;
-  filter: blur(14px) saturate(0.92) brightness(0.68);
-  transform: translate(-50%, -50%) scale(1.08);
+  filter: blur(7px) saturate(0.86) brightness(0.72);
+  transform: translate(-50%, -50%) scale(1.06);
+  mask-image: linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%);
+  opacity: 0;
+  transition: opacity 480ms ease;
+}
+
+.project-stage-mobile-backdrop__frame.is-vertical {
+  width: 100vw;
+  height: 100vh;
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.project-stage-mobile-backdrop__frame.is-loaded {
+  opacity: 1;
 }
 
 .project-stage.hover-active .project-item:not(.is-active) {
@@ -1835,6 +1927,10 @@ body.route-showreel .project-stage-mobile-backdrop {
   .project-stage-mobile-backdrop {
     position: fixed;
     inset: 0;
+  }
+
+  .project-stage-desktop-backdrop {
+    display: none;
   }
 
   .preview-strip {
