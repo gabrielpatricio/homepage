@@ -410,8 +410,7 @@ window.PORTFOLIO_DATA = {
         "Filmed at SES headquarters in Den Haag, this corporate interview features Louise Scott, Director of Corporate Marketing at SES. The video is part of the Success Stories series, highlighting impactful partnerships between leading companies and Monday Merch. Through Louise’s insights, the interview explores how strategic collaboration and branded merchandise can strengthen relationships, elevate brand presence, and drive measurable results.",
       credits: [
         "Guest - Louise Scott",
-        "Videographer - Gabriel Patrício",
-        "Editor - Gabriel Patrício"
+        "Director, Editor & Videographer - Gabriel Patrício"
       ],
       videoEmbed: "https://player.vimeo.com/video/1155748386?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&autoplay=1",
       stills: [
@@ -667,8 +666,7 @@ window.PORTFOLIO_DATA = {
 "Filmed at Metaview’s headquarters in London, this corporate interview features Violeta and Stephanie from the Metaview team. Part of the Success Stories series, the video highlights the collaboration between Metaview and Monday Merch. Through their perspectives, the interview explores how thoughtful partnerships and tailored branded merchandise can enhance company culture, strengthen connections, and create meaningful, lasting impressions.",
       credits: [
         "Guest - Violeta Moro and Stephanie Tsimis",
-        "Videographer - Gabriel Patrício",
-        "Editor - Gabriel Patrício"
+        "Director, Videographer & Editor - Gabriel Patrício"
       ],
       videoEmbed: "https://player.vimeo.com/video/1179616200?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&autoplay=1",
       stills: [
@@ -690,8 +688,7 @@ window.PORTFOLIO_DATA = {
       subtitle: "",
       description: "A 1-minute promotional video for Healthy Freaks, powered by HOKA. I worked as Videographer and Editor pairing with Kirian Dhyan Hirsiger, capturing dynamic shots and crafting a compelling visual narrative.",
       credits: [
-        "Camera - Gabriel Patrício & Kirian Hirsiger",
-        "Editor - Gabriel Patrício & Kirian Hirsiger"
+        "Director, Videographer & Editor - Gabriel Patrício & Kirian Hirsiger"
       ],
      videoEmbed: "https://player.vimeo.com/video/1192429653?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&autoplay=1",
       stills: [
@@ -701,6 +698,79 @@ window.PORTFOLIO_DATA = {
         "assets/media/projects/healthyfeaks-hoka/stills/5.png"    
       ]
     },
+     {
+      slug: "nown-interview",
+      title: "nown x monday merch - success stories",
+      role: "Videographer / Editor",
+      year: "2026",
+      type: "Corporate Video",
+      categories: ["Corporate Video"],
+      highlight: 1,
+      duration: "02:28",
+      client: "Monday Merch",
+      subtitle: "",
+      description: "Filmed at NOWN's headquarters in Amsterdam and directed, shot, and edited by Gabriel Patrício, this piece profiles founder Jason Gillette on the philosophy behind the brand and its partnership with Monday Merch on custom workwear, a collaboration rooted in shared precision and craft.",
+      credits: [
+        "Guest - Jason Gillette",
+        "Director, Videographer & Editor - Gabriel Patrício"
+      ],
+      videoEmbed: "https://player.vimeo.com/video/1210212677?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&autoplay=1",
+      stills: [
+        "assets/media/projects/nown-interview/stills/1.jpg",
+        "assets/media/projects/nown-interview/stills/2.jpg",
+        "assets/media/projects/nown-interview/stills/3.jpg",
+        "assets/media/projects/nown-interview/stills/4.jpg"
+
+      ]
+    },
+     {
+      slug: "choir-videoclip",
+      title: "Choir Videoclip",
+      hidden: true,
+      role: "Camera B ",
+      year: "2025",
+      type: "Music Video",
+      categories: ["Music Video"],
+      highlight: 1,
+      duration: "",
+      client: "Rawkost Film Production",
+      subtitle: "",
+      description: "",
+      credits: [
+      ],
+     videoEmbed: "",
+      stills: [
+        "assets/media/projects/choir-videoclip/stills/1.jpeg",
+        "assets/media/projects/choir-videoclip/stills/2.jpeg",
+        "assets/media/projects/choir-videoclip/stills/3.jpeg"      
+      ]
+    },
+     {
+      slug: "healthyfeaks-hoka",
+      title: "healthy freaks - powered by HOKA",
+      hidden: true,
+      role: "Videographer / Editor",
+      year: "2026",
+      type: "Social Media Brand Content",
+      orientation: "vertical",
+      hideStills: true,
+      categories: ["Social Media Brand Content", "Visual Storytelling"],
+      highlight: 1,
+      duration: "01:00",
+      client: "Healthy Freaks",
+      subtitle: "",
+      description: "A 1-minute promotional video for Healthy Freaks, powered by HOKA. I worked as Videographer and Editor pairing with Kirian Dhyan Hirsiger, capturing dynamic shots and crafting a compelling visual narrative.",
+      credits: [
+        "Director, Videographer & Editor - Gabriel Patrício & Kirian Hirsiger"
+      ],
+     videoEmbed: "https://player.vimeo.com/video/1192429653?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&autoplay=1",
+      stills: [
+        "assets/media/projects/healthyfeaks-hoka/stills/1.png",
+        "assets/media/projects/healthyfeaks-hoka/stills/2.png",
+        "assets/media/projects/healthyfeaks-hoka/stills/3.png",
+        "assets/media/projects/healthyfeaks-hoka/stills/5.png"    
+      ]
+    }
   ],
 
   photoAlbums: (window.PHOTO_ALBUMS || []).map((album) => ({
