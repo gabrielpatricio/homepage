@@ -1133,6 +1133,62 @@ body.route-showreel .project-stage-mobile-backdrop {
   background: rgba(255, 255, 255, 0.24);
 }
 
+/* Desktop: visible draggable thumb for easier scrubbing */
+@media (min-width: 861px) {
+  /* slimmer track for desktop */
+  .video-timeline {
+    height: 4px;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.95) 0,
+      rgba(255, 255, 255, 0.95) var(--progress),
+      rgba(255, 255, 255, 0.16) var(--progress),
+      rgba(255, 255, 255, 0.16) 100%
+    );
+  }
+
+  .video-timeline::-webkit-slider-runnable-track {
+    height: 4px;
+    background: transparent;
+  }
+
+  /* slightly smaller thumb and centered vertically */
+  .video-timeline::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    margin-top: -4px; /* center over 4px track */
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.38);
+    border: 1px solid rgba(0,0,0,0.12);
+    opacity: 1;
+    cursor: grab;
+  }
+
+  .video-timeline:active::-webkit-slider-thumb,
+  .video-timeline::-webkit-slider-thumb:active {
+    cursor: grabbing;
+  }
+
+  .video-timeline::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    margin-top: -4px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.38);
+    border: 1px solid rgba(0,0,0,0.12);
+    opacity: 1;
+    cursor: grab;
+  }
+
+  .video-timeline::-moz-range-track {
+    height: 4px;
+  }
+}
+
 .video-ratio {
   position: relative;
   aspect-ratio: 16 / 9;
@@ -1143,6 +1199,79 @@ body.route-showreel .project-stage-mobile-backdrop {
   inset: 0;
   z-index: 4;
   pointer-events: auto;
+}
+
+/* Fullscreen button (positioned at top-right of the video UI) */
+.video-fullscreen-ctrl {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  left: auto;
+  z-index: 6;
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 6px;
+  background: rgba(0,0,0,0.36);
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  backdrop-filter: blur(6px);
+  opacity: 1;
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.video-ui-layer > .video-fullscreen-ctrl,
+.video-fullscreen-ctrl {
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  left: auto !important;
+}
+
+.video-shell.is-fullscreen .video-ratio:not(.controls-active) .video-fullscreen-ctrl,
+.video-shell:fullscreen .video-ratio:not(.controls-active) .video-fullscreen-ctrl,
+.video-shell:-webkit-full-screen .video-ratio:not(.controls-active) .video-fullscreen-ctrl {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+}
+
+.video-shell.is-fullscreen .video-ratio.controls-active .video-fullscreen-ctrl,
+.video-shell:fullscreen .video-ratio.controls-active .video-fullscreen-ctrl,
+.video-shell:-webkit-full-screen .video-ratio.controls-active .video-fullscreen-ctrl {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.video-fullscreen-ctrl svg { width: 18px; height: 18px; }
+
+@media (max-width: 860px) {
+  /* very small draggable ball on mobile */
+  .video-timeline {
+    height: 2px;
+  }
+  .video-timeline::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 8px;
+    height: 8px;
+    margin-top: -3px; /* center over 2px track */
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.32);
+    border: 1px solid rgba(0,0,0,0.12);
+  }
+  .video-timeline::-moz-range-thumb {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.32);
+    border: 1px solid rgba(0,0,0,0.12);
+  }
 }
 
 .video-hit-area {
@@ -1164,6 +1293,55 @@ body.route-showreel .project-stage-mobile-backdrop {
   width: 100%;
   height: 100%;
   border: 0;
+}
+
+.video-shell.is-fullscreen,
+.video-shell:fullscreen,
+.video-shell:-webkit-full-screen {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #000;
+}
+
+.video-shell.is-fullscreen .video-ratio,
+.video-shell:fullscreen .video-ratio,
+.video-shell:-webkit-full-screen .video-ratio {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  aspect-ratio: unset !important;
+}
+
+.video-shell[data-orientation="vertical"].is-fullscreen .video-ratio,
+.video-shell[data-orientation="vertical"]:fullscreen .video-ratio,
+.video-shell[data-orientation="vertical"]:-webkit-full-screen .video-ratio {
+  width: auto !important;
+  height: 100% !important;
+  aspect-ratio: 9 / 16 !important;
+}
+
+.video-shell[data-orientation="horizontal"].is-fullscreen .video-ratio,
+.video-shell[data-orientation="horizontal"]:fullscreen .video-ratio,
+.video-shell[data-orientation="horizontal"]:-webkit-full-screen .video-ratio {
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 16 / 9 !important;
+}
+
+.video-shell.is-fullscreen .video-ratio iframe,
+.video-shell:fullscreen .video-ratio iframe,
+.video-shell:-webkit-full-screen .video-ratio iframe {
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .project-panel:not(.is-full-page).has-stills .project-video-grid:not(:empty) + .project-stills-shell {

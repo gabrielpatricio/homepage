@@ -1789,6 +1789,8 @@
         muteWrapper.className = "video-mute-wrapper";
         muteWrapper.appendChild(muteBtn);
 
+        
+
         const showMobileControls = () => {
           if (!isMobileChapterLayout) return;
           playBtn.classList.add("is-visible");
@@ -1824,7 +1826,9 @@
           provider,
           autoPlay: shouldAutoplay,
           startMuted: shouldStartMuted,
-          forceUnmutedOnFirstPlay: isMobileDevice && index === 0
+          forceUnmutedOnFirstPlay: isMobileDevice && index === 0,
+          isFullPage,
+          isVertical: orientations[index] === "vertical"
         });
         if (controller) {
           state.customVideoControllers.push(controller);
@@ -1837,6 +1841,9 @@
           provider,
           autoPlay: shouldAutoplay,
           startMuted: shouldStartMuted
+          ,
+          isFullPage,
+          isVertical: orientations[index] === "vertical"
         });
         if (controller) {
           state.customVideoControllers.push(controller);
@@ -2523,7 +2530,7 @@
     }
   }
 
-  function createStandardVideoControls({ shell, ratio, frame, provider, autoPlay = false, startMuted = false, forceUnmutedOnFirstPlay }) {
+  function createStandardVideoControls({ shell, ratio, frame, provider, autoPlay = false, startMuted = false, forceUnmutedOnFirstPlay, isFullPage = false, isVertical = false }) {
     const shouldForceUnmutedOnFirstPlay = forceUnmutedOnFirstPlay ?? (isIPhoneDevice() && window.innerWidth <= 860);
 
     if (provider === "vimeo" && typeof Vimeo !== "undefined") {
@@ -2534,7 +2541,9 @@
         buildAdapter: () => buildVimeoAdapter(player),
         autoPlay,
         startMuted,
-        forceUnmutedOnFirstPlay: shouldForceUnmutedOnFirstPlay
+        forceUnmutedOnFirstPlay: shouldForceUnmutedOnFirstPlay,
+        isFullPage,
+        isVertical
       });
     }
 
@@ -2545,6 +2554,8 @@
         autoPlay,
         startMuted,
         forceUnmutedOnFirstPlay: shouldForceUnmutedOnFirstPlay,
+        isFullPage,
+        isVertical,
         buildAdapter: async () => {
           const yt = await ensureYouTubeApi();
           return buildYouTubeAdapter(frame, yt);
@@ -2555,7 +2566,7 @@
     return null;
   }
 
-  function attachCustomControls({ shell, ratio, buildAdapter, autoPlay = false, startMuted = false, forceUnmutedOnFirstPlay = false }) {
+  function attachCustomControls({ shell, ratio, buildAdapter, autoPlay = false, startMuted = false, forceUnmutedOnFirstPlay = false, isFullPage = false, isVertical = false }) {
     const uiLayer = document.createElement("div");
     uiLayer.className = "video-ui-layer";
 
@@ -2605,6 +2616,33 @@
       event.stopPropagation();
     });
 
+    // Fullscreen button (omit for fullPage projects)
+    let fullscreenBtn = null;
+    if (!isFullPage) {
+      fullscreenBtn = document.createElement("button");
+      fullscreenBtn.type = "button";
+      fullscreenBtn.className = "video-fullscreen-ctrl";
+      fullscreenBtn.setAttribute("aria-label", "Toggle fullscreen");
+      fullscreenBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M7 14H5v4h4v-2H7v-2zm10 0v2h-2v2h4v-4h-2zM7 6h2V4H5v4h2V6zm10 0v2h2V4h-4v2h2z"></path></svg>
+      `;
+      // toggle fullscreen on click
+      fullscreenBtn.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        try {
+          if (document.fullscreenElement) {
+            document.exitFullscreen?.();
+          } else if (shell.requestFullscreen) {
+            shell.requestFullscreen().catch(() => {});
+          } else if (shell.webkitRequestFullscreen) {
+            shell.webkitRequestFullscreen();
+          }
+        } catch (_) {}
+      });
+      // Do not append yet; placement handled by applyMutePlacement
+    }
+
     const timeline = document.createElement("input");
     timeline.type = "range";
     timeline.className = "video-timeline";
@@ -2636,16 +2674,30 @@
         if (controls.contains(muteBtn)) controls.removeChild(muteBtn);
         if (!muteBtnWrapper.contains(muteBtn)) muteBtnWrapper.appendChild(muteBtn);
         if (!muteBtnWrapper.isConnected) ratio.appendChild(muteBtnWrapper);
+        if (fullscreenBtn) {
+          if (muteBtnWrapper.contains(fullscreenBtn)) muteBtnWrapper.removeChild(fullscreenBtn);
+          if (controls.contains(fullscreenBtn)) controls.removeChild(fullscreenBtn);
+          if (!uiLayer.contains(fullscreenBtn)) uiLayer.appendChild(fullscreenBtn);
+        }
       } else {
         if (muteBtnWrapper.contains(muteBtn)) muteBtnWrapper.removeChild(muteBtn);
         if (muteBtnWrapper.isConnected) muteBtnWrapper.remove();
         if (!controls.contains(muteBtn)) controls.appendChild(muteBtn);
+        // ensure fullscreen button sits on the UI layer (top-right overlay)
+        if (fullscreenBtn) {
+          if (muteBtnWrapper.contains(fullscreenBtn)) muteBtnWrapper.removeChild(fullscreenBtn);
+          if (controls.contains(fullscreenBtn)) controls.removeChild(fullscreenBtn);
+          if (!uiLayer.contains(fullscreenBtn)) uiLayer.appendChild(fullscreenBtn);
+        }
       }
     };
 
     uiLayer.appendChild(hitArea);
     uiLayer.appendChild(playBtn);
     uiLayer.appendChild(controls);
+    if (fullscreenBtn && !uiLayer.contains(fullscreenBtn)) {
+      uiLayer.appendChild(fullscreenBtn);
+    }
     ratio.appendChild(uiLayer);
     applyMutePlacement();
     window.requestAnimationFrame(applyMutePlacement);
@@ -2667,6 +2719,7 @@
     };
 
     let hideControlsTimer = null;
+    let onFsChange = null;
 
     const showControls = () => {
       ratio.classList.add("controls-active");
@@ -2751,6 +2804,10 @@
       if (ui.adapter && typeof ui.adapter.destroy === "function") {
         ui.adapter.destroy();
       }
+      if (onFsChange) {
+        document.removeEventListener("fullscreenchange", onFsChange);
+        onFsChange = null;
+      }
       uiLayer.remove();
     };
 
@@ -2806,6 +2863,53 @@
           setTimelineRatio(nextState.currentTime / ui.duration);
         }
       });
+
+      // Reflect fullscreen state on the shell for styling
+      onFsChange = () => {
+        const fsEl = document.fullscreenElement;
+        const isFs = Boolean(fsEl && (fsEl === shell || shell.contains(fsEl)));
+        if (isFs) shell.classList.add("is-fullscreen"); else shell.classList.remove("is-fullscreen");
+        if (fullscreenBtn) {
+          fullscreenBtn.classList.toggle("is-active", isFs);
+          fullscreenBtn.setAttribute("aria-pressed", String(isFs));
+        }
+
+        // Attempt to lock orientation to landscape when this shell enters fullscreen,
+        // and unlock when it exits. This works only on browsers that allow orientation
+        // lock in fullscreen (e.g., Chrome, some mobile browsers).
+        try {
+          const scr = window.screen || {};
+          const lockIfPossible = async () => {
+            if (scr.orientation && typeof scr.orientation.lock === 'function') {
+              await scr.orientation.lock('landscape').catch(() => {});
+            } else if (typeof scr.lockOrientation === 'function') {
+              try { scr.lockOrientation('landscape'); } catch (_) {}
+            } else if (typeof scr.webkitLockOrientation === 'function') {
+              try { scr.webkitLockOrientation('landscape'); } catch (_) {}
+            }
+          };
+
+          const unlockIfPossible = () => {
+            if (scr.orientation && typeof scr.orientation.unlock === 'function') {
+              try { scr.orientation.unlock(); } catch (_) {}
+            } else if (typeof scr.unlockOrientation === 'function') {
+              try { scr.unlockOrientation(); } catch (_) {}
+            } else if (typeof scr.webkitUnlockOrientation === 'function') {
+              try { scr.webkitUnlockOrientation(); } catch (_) {}
+            }
+          };
+
+          if (isFs && !isVertical) {
+            // Only try to lock when this shell is fullscreen and video is not vertical
+            lockIfPossible();
+          } else {
+            unlockIfPossible();
+          }
+        } catch (_) {
+          // ignore orientation lock errors
+        }
+      };
+      document.addEventListener("fullscreenchange", onFsChange);
 
       const playFromGesture = () => {
         if (!ui.adapter) return;
