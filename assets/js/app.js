@@ -1691,6 +1691,8 @@
       frame.title = `${project.title} video ${index + 1}`;
       frame.allow = "autoplay; fullscreen; picture-in-picture";
       frame.setAttribute("allowfullscreen", "");
+      frame.setAttribute("webkitallowfullscreen", "");
+      frame.setAttribute("mozallowfullscreen", "");
       frame.setAttribute("playsinline", "");
       frame.loading = isChapterPage ? "eager" : "lazy";
       frame.id = `project-video-${project.slug}-${index}`;
@@ -2493,7 +2495,7 @@
         parsed.searchParams.set("modestbranding", "1");
         parsed.searchParams.set("rel", "0");
         parsed.searchParams.set("playsinline", "1");
-        parsed.searchParams.set("fs", "0");
+        parsed.searchParams.set("fs", options.customUI ? "1" : "0");
         parsed.searchParams.set("iv_load_policy", "3");
         parsed.searchParams.set("enablejsapi", "1");
         parsed.searchParams.set("origin", window.location.origin);
@@ -2655,11 +2657,6 @@
         } catch (_) {}
       };
 
-      fullscreenBtn.addEventListener("pointerdown", (ev) => {
-        ev.preventDefault();
-        ev.stopPropagation();
-      });
-      fullscreenBtn.addEventListener("pointerup", toggleFullscreen);
       fullscreenBtn.addEventListener("click", toggleFullscreen);
       fullscreenBtn.addEventListener("touchend", toggleFullscreen);
       // Do not append yet; placement handled by applyMutePlacement
