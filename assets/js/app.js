@@ -2627,24 +2627,41 @@
         <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M7 14H5v4h4v-2H7v-2zm10 0v2h-2v2h4v-4h-2zM7 6h2V4H5v4h2V6zm10 0v2h2V4h-4v2h2z"></path></svg>
       `;
       // toggle fullscreen on click
-      fullscreenBtn.addEventListener("click", (ev) => {
-        ev.preventDefault();
-        ev.stopPropagation();
+      const toggleFullscreen = (ev) => {
+        if (ev) {
+          ev.preventDefault();
+          ev.stopPropagation();
+        }
+
         try {
           const iframe = shell.querySelector("iframe");
           const fullscreenTarget = iframe || shell;
 
-          if (document.fullscreenElement) {
+          if (document.fullscreenElement || document.webkitFullscreenElement) {
             document.exitFullscreen?.();
-          } else if (fullscreenTarget && fullscreenTarget.requestFullscreen) {
+            document.webkitExitFullscreen?.();
+            return;
+          }
+
+          if (fullscreenTarget && fullscreenTarget.requestFullscreen) {
             fullscreenTarget.requestFullscreen().catch(() => {});
+          } else if (fullscreenTarget && fullscreenTarget.webkitRequestFullscreen) {
+            fullscreenTarget.webkitRequestFullscreen();
           } else if (fullscreenTarget && fullscreenTarget.webkitEnterFullscreen) {
             fullscreenTarget.webkitEnterFullscreen();
-          } else if (shell.webkitRequestFullscreen) {
-            shell.webkitRequestFullscreen();
+          } else if (iframe && iframe.webkitRequestFullscreen) {
+            iframe.webkitRequestFullscreen();
           }
         } catch (_) {}
+      };
+
+      fullscreenBtn.addEventListener("pointerdown", (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
       });
+      fullscreenBtn.addEventListener("pointerup", toggleFullscreen);
+      fullscreenBtn.addEventListener("click", toggleFullscreen);
+      fullscreenBtn.addEventListener("touchend", toggleFullscreen);
       // Do not append yet; placement handled by applyMutePlacement
     }
 
@@ -2915,6 +2932,7 @@
         }
       };
       document.addEventListener("fullscreenchange", onFsChange);
+      document.addEventListener("webkitfullscreenchange", onFsChange);
 
       const playFromGesture = () => {
         if (!ui.adapter) return;

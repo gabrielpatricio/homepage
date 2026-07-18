@@ -1290,6 +1290,11 @@ body.route-showreel .project-stage-mobile-backdrop {
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
+  touch-action: none;
+}
+
+.video-fullscreen-ctrl {
+  touch-action: manipulation;
 }
 
 .video-ratio iframe {
