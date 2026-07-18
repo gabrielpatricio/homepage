@@ -1098,6 +1098,8 @@
         frame.title = `Background showreel clip ${index + 1}`;
         frame.allow = "autoplay; fullscreen; picture-in-picture";
         frame.setAttribute("allowfullscreen", "");
+        frame.setAttribute("webkitallowfullscreen", "");
+        frame.setAttribute("mozallowfullscreen", "");
         frame.setAttribute("playsinline", "");
         frame.setAttribute("tabindex", "-1");
         frame.setAttribute("loading", index < 4 ? "eager" : "lazy");
@@ -1135,6 +1137,8 @@
     frame.className = "project-stage-mobile-backdrop__frame";
     frame.allow = "autoplay; fullscreen; picture-in-picture";
     frame.setAttribute("allowfullscreen", "");
+    frame.setAttribute("webkitallowfullscreen", "");
+    frame.setAttribute("mozallowfullscreen", "");
     frame.setAttribute("playsinline", "");
     frame.tabIndex = -1;
     const activeEntry = state.mobileProjectBackdropSources[state.mobileProjectBackdropIndex] || null;
@@ -2638,6 +2642,15 @@
         try {
           const iframe = shell.querySelector("iframe");
           const fullscreenTarget = iframe || shell;
+          try {
+            // Minimal console trace to help diagnose mobile fullscreen availability.
+            console.debug("toggleFullscreen: availability", {
+              iframe: Boolean(iframe),
+              requestFullscreen: Boolean(fullscreenTarget && fullscreenTarget.requestFullscreen),
+              webkitRequestFullscreen: Boolean(fullscreenTarget && fullscreenTarget.webkitRequestFullscreen),
+              webkitEnterFullscreen: Boolean(fullscreenTarget && fullscreenTarget.webkitEnterFullscreen)
+            });
+          } catch (_) {}
 
           if (document.fullscreenElement || document.webkitFullscreenElement) {
             document.exitFullscreen?.();
