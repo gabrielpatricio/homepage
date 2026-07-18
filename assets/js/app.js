@@ -2631,10 +2631,15 @@
         ev.preventDefault();
         ev.stopPropagation();
         try {
+          const iframe = shell.querySelector("iframe");
+          const fullscreenTarget = iframe || shell;
+
           if (document.fullscreenElement) {
             document.exitFullscreen?.();
-          } else if (shell.requestFullscreen) {
-            shell.requestFullscreen().catch(() => {});
+          } else if (fullscreenTarget && fullscreenTarget.requestFullscreen) {
+            fullscreenTarget.requestFullscreen().catch(() => {});
+          } else if (fullscreenTarget && fullscreenTarget.webkitEnterFullscreen) {
+            fullscreenTarget.webkitEnterFullscreen();
           } else if (shell.webkitRequestFullscreen) {
             shell.webkitRequestFullscreen();
           }
