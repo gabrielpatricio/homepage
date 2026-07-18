@@ -1197,8 +1197,9 @@ body.route-showreel .project-stage-mobile-backdrop {
 .video-ui-layer {
   position: absolute;
   inset: 0;
-  z-index: 4;
+  z-index: 1000;
   pointer-events: auto;
+  touch-action: manipulation;
 }
 
 /* Fullscreen button (positioned at top-right of the video UI) */
@@ -1207,19 +1208,23 @@ body.route-showreel .project-stage-mobile-backdrop {
   top: 8px;
   right: 8px;
   left: auto;
-  z-index: 6;
+  z-index: 9999;
   display: inline-grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
-  padding: 6px;
+  min-width: 44px;
+  min-height: 44px;
+  width: 44px;
+  height: 44px;
+  padding: 8px;
   background: rgba(0,0,0,0.36);
   color: #fff;
   border: 0;
-  border-radius: 8px;
+  border-radius: 10px;
   backdrop-filter: blur(6px);
   opacity: 1;
   transition: opacity 220ms ease, transform 220ms ease;
+  pointer-events: auto !important;
+  touch-action: manipulation;
 }
 
 .video-ui-layer > .video-fullscreen-ctrl,
