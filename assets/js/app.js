@@ -2927,26 +2927,40 @@
 
       // Reflect fullscreen state on the shell for styling
       onFsChange = () => {
-        const fsEl = document.fullscreenElement;
-        const isFs = Boolean(fsEl && (fsEl === shell || shell.contains(fsEl)));
-        if (isFs) shell.classList.add("is-fullscreen"); else shell.classList.remove("is-fullscreen");
+        const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
+        const isFs = Boolean(
+          fsEl && (fsEl === shell || shell.contains(fsEl))
+        ) || shell.classList.contains("is-fullscreen-fallback");
+
+        shell.classList.toggle("is-fullscreen", isFs && !shell.classList.contains("is-fullscreen-fallback"));
+        shell.classList.toggle("is-fullscreen-fallback", shell.classList.contains("is-fullscreen-fallback"));
+
         if (fullscreenBtn) {
           fullscreenBtn.classList.toggle("is-active", isFs);
           fullscreenBtn.setAttribute("aria-pressed", String(isFs));
         }
 
-        // Attempt to lock orientation to landscape when this shell enters fullscreen,
-        // and unlock when it exits. This works only on browsers that allow orientation
-        // lock in fullscreen (e.g., Chrome, some mobile browsers).
+        // Attempt to lock orientation in fullscreen: portrait for vertical videos,
+        // landscape for horizontal videos. Unlock when exiting fullscreen.
         try {
           const scr = window.screen || {};
-          const lockIfPossible = async () => {
+          const lockLandscape = async () => {
             if (scr.orientation && typeof scr.orientation.lock === 'function') {
-              await scr.orientation.lock('landscape').catch(() => {});
+              await scr.orientation.lock('landscape-primary').catch(() => scr.orientation.lock('landscape').catch(() => {}));
             } else if (typeof scr.lockOrientation === 'function') {
               try { scr.lockOrientation('landscape'); } catch (_) {}
             } else if (typeof scr.webkitLockOrientation === 'function') {
               try { scr.webkitLockOrientation('landscape'); } catch (_) {}
+            }
+          };
+
+          const lockPortrait = async () => {
+            if (scr.orientation && typeof scr.orientation.lock === 'function') {
+              await scr.orientation.lock('portrait-primary').catch(() => scr.orientation.lock('portrait').catch(() => {}));
+            } else if (typeof scr.lockOrientation === 'function') {
+              try { scr.lockOrientation('portrait'); } catch (_) {}
+            } else if (typeof scr.webkitLockOrientation === 'function') {
+              try { scr.webkitLockOrientation('portrait'); } catch (_) {}
             }
           };
 
@@ -2960,9 +2974,12 @@
             }
           };
 
-          if (isFs && !isVertical) {
-            // Only try to lock when this shell is fullscreen and video is not vertical
-            lockIfPossible();
+          if (isFs) {
+            if (isVertical) {
+              lockPortrait();
+            } else {
+              lockLandscape();
+            }
           } else {
             unlockIfPossible();
           }

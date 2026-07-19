@@ -1235,17 +1235,10 @@ body.route-showreel .project-stage-mobile-backdrop {
   left: auto !important;
 }
 
-.video-shell.is-fullscreen .video-ratio:not(.controls-active) .video-fullscreen-ctrl,
-.video-shell:fullscreen .video-ratio:not(.controls-active) .video-fullscreen-ctrl,
-.video-shell:-webkit-full-screen .video-ratio:not(.controls-active) .video-fullscreen-ctrl {
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(-4px);
-}
-
-.video-shell.is-fullscreen .video-ratio.controls-active .video-fullscreen-ctrl,
-.video-shell:fullscreen .video-ratio.controls-active .video-fullscreen-ctrl,
-.video-shell:-webkit-full-screen .video-ratio.controls-active .video-fullscreen-ctrl {
+.video-shell.is-fullscreen .video-ratio .video-fullscreen-ctrl,
+.video-shell:fullscreen .video-ratio .video-fullscreen-ctrl,
+.video-shell:-webkit-full-screen .video-ratio .video-fullscreen-ctrl,
+.video-shell.is-fullscreen-fallback .video-ratio .video-fullscreen-ctrl {
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);
@@ -1375,6 +1368,47 @@ body.route-showreel .project-stage-mobile-backdrop {
   max-width: 100% !important;
   max-height: 100% !important;
   aspect-ratio: unset !important;
+}
+
+.video-shell.is-fullscreen:not([data-orientation="vertical"]) .video-ratio,
+.video-shell:fullscreen:not([data-orientation="vertical"]) .video-ratio,
+.video-shell:-webkit-full-screen:not([data-orientation="vertical"]) .video-ratio,
+.video-shell.is-fullscreen-fallback:not([data-orientation="vertical"]) .video-ratio {
+  width: 100% !important;
+  height: 100% !important;
+  aspect-ratio: unset !important;
+  overflow: hidden !important;
+}
+
+.video-shell.is-fullscreen:not([data-orientation="vertical"]) .video-ratio iframe,
+.video-shell:fullscreen:not([data-orientation="vertical"]) .video-ratio iframe,
+.video-shell:-webkit-full-screen:not([data-orientation="vertical"]) .video-ratio iframe,
+.video-shell.is-fullscreen-fallback:not([data-orientation="vertical"]) .video-ratio iframe {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  position: relative !important;
+  transform: none !important;
+  top: auto !important;
+  left: auto !important;
+}
+
+@media (orientation: portrait) {
+  .video-shell.is-fullscreen:not([data-orientation="vertical"]) .video-ratio iframe,
+  .video-shell:fullscreen:not([data-orientation="vertical"]) .video-ratio iframe,
+  .video-shell:-webkit-full-screen:not([data-orientation="vertical"]) .video-ratio iframe,
+  .video-shell.is-fullscreen-fallback:not([data-orientation="vertical"]) .video-ratio iframe {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    width: 100vh !important;
+    height: 100vw !important;
+    max-width: none !important;
+    max-height: none !important;
+    transform: translate(-50%, -50%) rotate(90deg);
+    transform-origin: center center;
+  }
 }
 
 .video-shell.is-fullscreen-fallback .video-ratio iframe {
