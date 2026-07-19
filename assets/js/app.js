@@ -148,7 +148,8 @@
   function syncOrientationGuard() {
     if (!els.orientationGuard) return;
     const isLandscape = window.matchMedia("(orientation: landscape)").matches;
-    const shouldBlock = shouldLockPortraitOnMobile() && isLandscape;
+    const isFsActive = document.body.classList.contains('video-fullscreen-active') || document.body.classList.contains('video-fullscreen-fallback-active');
+    const shouldBlock = shouldLockPortraitOnMobile() && isLandscape && !isFsActive;
 
     els.orientationGuard.hidden = !shouldBlock;
     els.orientationGuard.setAttribute("aria-hidden", shouldBlock ? "false" : "true");
@@ -2669,6 +2670,8 @@
             fullscreenBtn.setAttribute("aria-pressed", String(isActive));
           }
           document.body.classList.toggle("video-fullscreen-fallback-active", isActive);
+          // Also mark overall fullscreen-active so orientation guard can exempt while a video is fullscreen
+          document.body.classList.toggle('video-fullscreen-active', isActive);
         };
 
         const tryFullscreen = async (target) => {
@@ -2939,6 +2942,11 @@
           fullscreenBtn.classList.toggle("is-active", isFs);
           fullscreenBtn.setAttribute("aria-pressed", String(isFs));
         }
+
+        // Reflect fullscreen-active on body so orientation guard can allow rotation
+        try {
+          document.body.classList.toggle('video-fullscreen-active', isFs);
+        } catch (_) {}
 
         // Attempt to lock orientation in fullscreen: portrait for vertical videos,
         // landscape for horizontal videos. Unlock when exiting fullscreen.
