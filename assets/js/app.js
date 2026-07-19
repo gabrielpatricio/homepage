@@ -171,6 +171,16 @@
     scheduleOrientationGuardSync();
   }
 
+  function clearVideoFullscreenForRouteChange() {
+    document.querySelectorAll(".video-shell.is-fullscreen, .video-shell.is-fullscreen-fallback").forEach((shell) => {
+      shell.classList.remove("is-fullscreen", "is-fullscreen-fallback");
+    });
+    state.videoFullscreenSawLandscape = false;
+    syncVideoFullscreenBodyState();
+    exitDocumentFullscreen();
+    scheduleOrientationGuardSync();
+  }
+
   function syncVideoFullscreenOrientationExit() {
     if (!shouldLockPortraitOnMobile() || !hasVideoFullscreenActive()) {
       state.videoFullscreenSawLandscape = false;
@@ -567,6 +577,10 @@
     els.logoTrigger.addEventListener("click", playIntro);
 
     window.addEventListener("hashchange", handleRoute);
+    window.addEventListener("popstate", () => {
+      clearVideoFullscreenForRouteChange();
+      scheduleOrientationGuardSync();
+    });
     window.addEventListener("resize", debounce(() => {
       renderProjects();
       queueMobileBackdropScrollSync();
@@ -1625,6 +1639,8 @@
   }
 
   function handleRoute() {
+    clearVideoFullscreenForRouteChange();
+
     const hash = location.hash.replace(/^#/, "");
     const [route, slug] = hash.split("/");
 
@@ -1701,6 +1717,7 @@
 
   function closeAllOverlays() {
 
+    clearVideoFullscreenForRouteChange();
     closeProjectStillViewer();
     unlockPageScroll();
     [els.projectOverlay, els.galleryOverlay, els.aboutOverlay].forEach((overlay) => {
