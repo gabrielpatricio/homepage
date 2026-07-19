@@ -253,10 +253,6 @@
     return false;
   }
 
-  function lockLandscapeOrientation() {
-    return lockScreenOrientation(["landscape-primary", "landscape"]);
-  }
-
   function lockPortraitOrientation() {
     return lockScreenOrientation(["portrait-primary", "portrait"]);
   }
@@ -2768,11 +2764,10 @@
           return;
         }
 
-        const lockForVideo = () => isVertical ? lockPortraitOrientation() : lockLandscapeOrientation();
         const entered = await requestElementFullscreen(fullscreenTarget);
         if (entered) {
           syncVideoFullscreenBodyState();
-          await lockForVideo();
+          await lockPortraitOrientation();
           syncOrientationGuard();
           return;
         }
@@ -2785,7 +2780,7 @@
           fullscreenBtn.setAttribute("aria-pressed", "true");
         }
 
-        await lockForVideo();
+        await lockPortraitOrientation();
         syncOrientationGuard();
       };
 
@@ -3029,11 +3024,10 @@
 
         syncVideoFullscreenBodyState();
 
-        // Attempt to lock orientation in fullscreen: portrait for vertical videos,
-        // landscape for horizontal videos. Unlock when exiting fullscreen.
+        // Keep fullscreen in portrait whenever the browser allows it.
         try {
           if (isFs) {
-            await (isVertical ? lockPortraitOrientation() : lockLandscapeOrientation());
+            await lockPortraitOrientation();
           } else if (!hasVideoFullscreenActive()) {
             unlockScreenOrientation();
           }

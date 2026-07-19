@@ -746,8 +746,8 @@ window.PORTFOLIO_DATA = {
       ]
     },
      {
-      slug: "healthyfeaks-hoka",
-      title: "healthy freaks - powered by HOKA",
+      slug: "benny-sara-popup",
+      title: "Benny & Sara - Popup Experience",
       hidden: true,
       role: "Videographer / Editor",
       year: "2026",

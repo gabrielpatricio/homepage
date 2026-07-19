@@ -1334,7 +1334,8 @@ body.route-showreel .project-stage-mobile-backdrop {
 
 .video-shell[data-orientation="horizontal"].is-fullscreen .video-ratio,
 .video-shell[data-orientation="horizontal"]:fullscreen .video-ratio,
-.video-shell[data-orientation="horizontal"]:-webkit-full-screen .video-ratio {
+.video-shell[data-orientation="horizontal"]:-webkit-full-screen .video-ratio,
+.video-shell[data-orientation="horizontal"].is-fullscreen-fallback .video-ratio {
   width: 100% !important;
   height: auto !important;
   aspect-ratio: 16 / 9 !important;
@@ -1375,8 +1376,8 @@ body.route-showreel .project-stage-mobile-backdrop {
 .video-shell:-webkit-full-screen:not([data-orientation="vertical"]) .video-ratio,
 .video-shell.is-fullscreen-fallback:not([data-orientation="vertical"]) .video-ratio {
   width: 100% !important;
-  height: 100% !important;
-  aspect-ratio: unset !important;
+  height: auto !important;
+  aspect-ratio: 16 / 9 !important;
   overflow: hidden !important;
 }
 
@@ -1392,20 +1393,6 @@ body.route-showreel .project-stage-mobile-backdrop {
   transform: none !important;
   top: auto !important;
   left: auto !important;
-}
-
-@media (orientation: portrait) {
-  .video-shell.is-fullscreen-fallback:not([data-orientation="vertical"]) .video-ratio iframe {
-    position: absolute !important;
-    top: 50% !important;
-    left: 50% !important;
-    width: 100vh !important;
-    height: 100vw !important;
-    max-width: none !important;
-    max-height: none !important;
-    transform: translate(-50%, -50%) rotate(90deg);
-    transform-origin: center center;
-  }
 }
 
 .video-shell.is-fullscreen-fallback .video-ratio iframe {
