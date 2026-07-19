@@ -64,7 +64,7 @@ img {
 .orientation-guard {
   position: fixed;
   inset: 0;
-  z-index: 10001;
+  z-index: 100000;
   display: none;
   align-items: center;
   justify-content: center;
@@ -1247,28 +1247,51 @@ body.route-showreel .project-stage-mobile-backdrop {
 .video-fullscreen-ctrl svg { width: 18px; height: 18px; }
 
 @media (max-width: 860px) {
-  /* very small draggable ball on mobile */
   .video-timeline {
-    height: 2px;
+    height: 28px;
+    background:
+      linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.95) 0,
+        rgba(255, 255, 255, 0.95) var(--progress),
+        rgba(255, 255, 255, 0.24) var(--progress),
+        rgba(255, 255, 255, 0.24) 100%
+      )
+      center / 100% 4px no-repeat;
+    touch-action: none;
   }
+
+  .video-timeline::-webkit-slider-runnable-track {
+    height: 4px;
+    background: transparent;
+  }
+
   .video-timeline::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 8px;
-    height: 8px;
-    margin-top: -3px; /* center over 2px track */
+    width: 18px;
+    height: 18px;
+    margin-top: -7px;
     border-radius: 50%;
     background: #ffffff;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.32);
-    border: 1px solid rgba(0,0,0,0.12);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.42);
+    border: 1px solid rgba(0, 0, 0, 0.16);
+    opacity: 1;
   }
+
   .video-timeline::-moz-range-thumb {
-    width: 8px;
-    height: 8px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     background: #ffffff;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.32);
-    border: 1px solid rgba(0,0,0,0.12);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.42);
+    border: 1px solid rgba(0, 0, 0, 0.16);
+    opacity: 1;
+  }
+
+  .video-timeline::-moz-range-track {
+    height: 4px;
+    background: transparent;
   }
 }
 
@@ -1902,6 +1925,12 @@ body.video-fullscreen-fallback-active {
 .project-overlay .close-overlay:focus-visible {
   background: transparent;
   opacity: 0.7;
+}
+
+body.video-fullscreen-active .project-overlay .close-overlay {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
 }
 
 .project-overlay .overlay-panel {

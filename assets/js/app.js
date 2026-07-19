@@ -142,13 +142,15 @@
   }
 
   function shouldLockPortraitOnMobile() {
-    return window.matchMedia("(max-width: 860px)").matches;
+    const isTouchDevice = window.matchMedia("(hover: none) and (pointer: coarse)").matches || navigator.maxTouchPoints > 0;
+    const isMobileViewport = window.matchMedia("(max-width: 860px), (max-height: 480px)").matches;
+    return isTouchDevice && isMobileViewport;
   }
 
   function syncOrientationGuard() {
     if (!els.orientationGuard) return;
     const isLandscape = window.matchMedia("(orientation: landscape)").matches;
-    const isFsActive = document.body.classList.contains('video-fullscreen-active') || document.body.classList.contains('video-fullscreen-fallback-active');
+    const isFsActive = document.body.classList.contains("video-fullscreen-active") || document.body.classList.contains("video-fullscreen-fallback-active");
     const shouldBlock = shouldLockPortraitOnMobile() && isLandscape && !isFsActive;
 
     els.orientationGuard.hidden = !shouldBlock;
@@ -536,6 +538,7 @@
     els.showreel?.addEventListener("pointerdown", ensureMobileBackdropPlayback, { passive: true });
     els.showreel?.addEventListener("touchstart", ensureMobileBackdropPlayback, { passive: true });
     window.addEventListener("orientationchange", syncOrientationGuard);
+    window.screen?.orientation?.addEventListener?.("change", syncOrientationGuard);
     window.addEventListener("pointerdown", unlockMobileAutoplayOnce, { once: true, passive: true });
     window.addEventListener("touchstart", unlockMobileAutoplayOnce, { once: true, passive: true });
     document.addEventListener("visibilitychange", () => {
