@@ -2639,6 +2639,40 @@
       fullscreenBtn.innerHTML = `
         <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M7 14H5v4h4v-2H7v-2zm10 0v2h-2v2h4v-4h-2zM7 6h2V4H5v4h2V6zm10 0v2h2V4h-4v2h2z"></path></svg>
       `;
+      // Orientation lock helpers (used for native and fallback fullscreen)
+      const lockLandscape = async () => {
+        const scr = window.screen || {};
+        if (scr.orientation && typeof scr.orientation.lock === 'function') {
+          await scr.orientation.lock('landscape-primary').catch(() => scr.orientation.lock('landscape').catch(() => {}));
+        } else if (typeof scr.lockOrientation === 'function') {
+          try { scr.lockOrientation('landscape'); } catch (_) {}
+        } else if (typeof scr.webkitLockOrientation === 'function') {
+          try { scr.webkitLockOrientation('landscape'); } catch (_) {}
+        }
+      };
+
+      const lockPortrait = async () => {
+        const scr = window.screen || {};
+        if (scr.orientation && typeof scr.orientation.lock === 'function') {
+          await scr.orientation.lock('portrait-primary').catch(() => scr.orientation.lock('portrait').catch(() => {}));
+        } else if (typeof scr.lockOrientation === 'function') {
+          try { scr.lockOrientation('portrait'); } catch (_) {}
+        } else if (typeof scr.webkitLockOrientation === 'function') {
+          try { scr.webkitLockOrientation('portrait'); } catch (_) {}
+        }
+      };
+
+      const unlockIfPossible = () => {
+        const scr = window.screen || {};
+        if (scr.orientation && typeof scr.orientation.unlock === 'function') {
+          try { scr.orientation.unlock(); } catch (_) {}
+        } else if (typeof scr.unlockOrientation === 'function') {
+          try { scr.unlockOrientation(); } catch (_) {}
+        } else if (typeof scr.webkitUnlockOrientation === 'function') {
+          try { scr.webkitUnlockOrientation(); } catch (_) {}
+        }
+      };
+
       // toggle fullscreen on click
       const toggleFullscreen = async () => {
         const iframe = shell.querySelector("iframe");
@@ -2658,6 +2692,8 @@
 
         const isCurrentlyFullscreen = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
         if (isCurrentlyFullscreen) {
+          // exiting fullscreen: unlock orientation
+          try { unlockIfPossible(); } catch (_) {}
           document.exitFullscreen?.();
           document.webkitExitFullscreen?.();
           return;
@@ -2695,7 +2731,16 @@
           return false;
         };
 
-        if (await tryFullscreen(iframe) || await tryFullscreen(fullscreenTarget)) {
+        const entered = (await tryFullscreen(iframe)) || (await tryFullscreen(fullscreenTarget));
+        if (entered) {
+          // force orientation lock when entering fullscreen for horizontal videos
+          try {
+            if (isVertical) {
+              lockPortrait();
+            } else {
+              lockLandscape();
+            }
+          } catch (_) {}
           return;
         }
 
