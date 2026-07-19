@@ -24,6 +24,7 @@
     chapterHintTimer: null,
     projectNodeMap: new Map(),
     orientationLockAttempted: false,
+    videoFullscreenSawLandscape: false,
     projectSeeMoreGestureCleanup: null,
     mobileProjectBackdropSources: [],
     mobileProjectBackdropIndex: 0,
@@ -157,6 +158,41 @@
     els.orientationGuard.hidden = !shouldBlock;
     els.orientationGuard.setAttribute("aria-hidden", shouldBlock ? "false" : "true");
     els.body.classList.toggle("orientation-guard-active", shouldBlock);
+  }
+
+  function exitActiveVideoFullscreen() {
+    document.querySelectorAll(".video-shell.is-fullscreen-fallback").forEach((shell) => {
+      shell.classList.remove("is-fullscreen", "is-fullscreen-fallback");
+    });
+    state.videoFullscreenSawLandscape = false;
+    syncVideoFullscreenBodyState();
+    unlockScreenOrientation();
+    exitDocumentFullscreen();
+    scheduleOrientationGuardSync();
+  }
+
+  function syncVideoFullscreenOrientationExit() {
+    if (!shouldLockPortraitOnMobile() || !hasVideoFullscreenActive()) {
+      state.videoFullscreenSawLandscape = false;
+      return;
+    }
+
+    const isLandscape = window.matchMedia("(orientation: landscape)").matches;
+    if (isLandscape) {
+      state.videoFullscreenSawLandscape = true;
+      return;
+    }
+
+    if (state.videoFullscreenSawLandscape) {
+      exitActiveVideoFullscreen();
+    }
+  }
+
+  function scheduleVideoFullscreenOrientationExit() {
+    syncVideoFullscreenOrientationExit();
+    window.requestAnimationFrame(syncVideoFullscreenOrientationExit);
+    window.setTimeout(syncVideoFullscreenOrientationExit, 120);
+    window.setTimeout(syncVideoFullscreenOrientationExit, 350);
   }
 
   function scheduleOrientationGuardSync() {
@@ -535,6 +571,7 @@
       renderProjects();
       queueMobileBackdropScrollSync();
       ensureDesktopBackdropPlayback();
+      scheduleVideoFullscreenOrientationExit();
       scheduleOrientationGuardSync();
       attemptPortraitOrientationLock();
     }, 120));
@@ -545,10 +582,22 @@
     window.addEventListener("touchmove", queueMobileBackdropScrollSync, { passive: true });
     els.showreel?.addEventListener("pointerdown", ensureMobileBackdropPlayback, { passive: true });
     els.showreel?.addEventListener("touchstart", ensureMobileBackdropPlayback, { passive: true });
-    window.addEventListener("orientationchange", scheduleOrientationGuardSync);
-    window.screen?.orientation?.addEventListener?.("change", scheduleOrientationGuardSync);
-    document.addEventListener("fullscreenchange", scheduleOrientationGuardSync);
-    document.addEventListener("webkitfullscreenchange", scheduleOrientationGuardSync);
+    window.addEventListener("orientationchange", () => {
+      scheduleVideoFullscreenOrientationExit();
+      scheduleOrientationGuardSync();
+    });
+    window.screen?.orientation?.addEventListener?.("change", () => {
+      scheduleVideoFullscreenOrientationExit();
+      scheduleOrientationGuardSync();
+    });
+    document.addEventListener("fullscreenchange", () => {
+      scheduleVideoFullscreenOrientationExit();
+      scheduleOrientationGuardSync();
+    });
+    document.addEventListener("webkitfullscreenchange", () => {
+      scheduleVideoFullscreenOrientationExit();
+      scheduleOrientationGuardSync();
+    });
     window.addEventListener("pointerdown", unlockMobileAutoplayOnce, { once: true, passive: true });
     window.addEventListener("touchstart", unlockMobileAutoplayOnce, { once: true, passive: true });
     document.addEventListener("visibilitychange", () => {
@@ -2780,7 +2829,8 @@
         const entered = await requestElementFullscreen(fullscreenTarget);
         if (entered) {
           syncVideoFullscreenBodyState();
-          await lockPortraitOrientation();
+          unlockScreenOrientation();
+          scheduleVideoFullscreenOrientationExit();
           scheduleOrientationGuardSync();
           return;
         }
@@ -2793,7 +2843,8 @@
           fullscreenBtn.setAttribute("aria-pressed", "true");
         }
 
-        await lockPortraitOrientation();
+        unlockScreenOrientation();
+        scheduleVideoFullscreenOrientationExit();
         scheduleOrientationGuardSync();
       };
 
@@ -3037,11 +3088,14 @@
 
         syncVideoFullscreenBodyState();
 
-        // Keep fullscreen in portrait whenever the browser allows it.
+        // Let fullscreen video rotate freely; if it returns from landscape to portrait,
+        // the orientation handler exits fullscreen.
         try {
           if (isFs) {
-            await lockPortraitOrientation();
+            unlockScreenOrientation();
+            scheduleVideoFullscreenOrientationExit();
           } else if (!hasVideoFullscreenActive()) {
+            state.videoFullscreenSawLandscape = false;
             unlockScreenOrientation();
           }
           scheduleOrientationGuardSync();
