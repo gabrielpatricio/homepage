@@ -1354,6 +1354,38 @@ body.route-showreel .project-stage-mobile-backdrop {
   height: 100% !important;
 }
 
+.video-shell.is-fullscreen-fallback {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+  z-index: 99999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #000;
+}
+
+.video-shell.is-fullscreen-fallback .video-ratio {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  aspect-ratio: unset !important;
+}
+
+.video-shell.is-fullscreen-fallback .video-ratio iframe {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+body.video-fullscreen-fallback-active {
+  overflow: hidden !important;
+}
+
 .project-panel:not(.is-full-page).has-stills .project-video-grid:not(:empty) + .project-stills-shell {
   border-top: 3px solid #fff;
   padding-top: 28px;

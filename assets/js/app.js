@@ -1096,11 +1096,13 @@
         const frame = document.createElement("iframe");
         frame.className = "project-stage-desktop-backdrop__frame";
         frame.title = `Background showreel clip ${index + 1}`;
-        frame.allow = "autoplay; fullscreen; picture-in-picture";
+        frame.allow = "autoplay; fullscreen; picture-in-picture; encrypted-media";
+        frame.setAttribute("allow", "autoplay; fullscreen; picture-in-picture; encrypted-media");
         frame.setAttribute("allowfullscreen", "");
         frame.setAttribute("webkitallowfullscreen", "");
         frame.setAttribute("mozallowfullscreen", "");
         frame.setAttribute("playsinline", "");
+        frame.setAttribute("webkit-playsinline", "");
         frame.setAttribute("tabindex", "-1");
         frame.setAttribute("loading", index < 4 ? "eager" : "lazy");
         frame.dataset.src = embedUrl;
@@ -1135,11 +1137,13 @@
 
     const frame = document.createElement("iframe");
     frame.className = "project-stage-mobile-backdrop__frame";
-    frame.allow = "autoplay; fullscreen; picture-in-picture";
+    frame.allow = "autoplay; fullscreen; picture-in-picture; encrypted-media";
+    frame.setAttribute("allow", "autoplay; fullscreen; picture-in-picture; encrypted-media");
     frame.setAttribute("allowfullscreen", "");
     frame.setAttribute("webkitallowfullscreen", "");
     frame.setAttribute("mozallowfullscreen", "");
     frame.setAttribute("playsinline", "");
+    frame.setAttribute("webkit-playsinline", "");
     frame.tabIndex = -1;
     const activeEntry = state.mobileProjectBackdropSources[state.mobileProjectBackdropIndex] || null;
     frame.classList.toggle("is-vertical", activeEntry?.orientation === "vertical");
@@ -1693,11 +1697,13 @@
 
       const frame = document.createElement("iframe");
       frame.title = `${project.title} video ${index + 1}`;
-      frame.allow = "autoplay; fullscreen; picture-in-picture";
+      frame.allow = "autoplay; fullscreen; picture-in-picture; encrypted-media";
+      frame.setAttribute("allow", "autoplay; fullscreen; picture-in-picture; encrypted-media");
       frame.setAttribute("allowfullscreen", "");
       frame.setAttribute("webkitallowfullscreen", "");
       frame.setAttribute("mozallowfullscreen", "");
       frame.setAttribute("playsinline", "");
+      frame.setAttribute("webkit-playsinline", "");
       frame.loading = isChapterPage ? "eager" : "lazy";
       frame.id = `project-video-${project.slug}-${index}`;
       frame.src = videoUrl;
@@ -2633,41 +2639,64 @@
         <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M7 14H5v4h4v-2H7v-2zm10 0v2h-2v2h4v-4h-2zM7 6h2V4H5v4h2V6zm10 0v2h2V4h-4v2h2z"></path></svg>
       `;
       // toggle fullscreen on click
-      const toggleFullscreen = (ev) => {
-        if (ev) {
-          ev.preventDefault();
-          ev.stopPropagation();
-        }
+      const toggleFullscreen = async () => {
+        const iframe = shell.querySelector("iframe");
+        const fullscreenTarget = iframe || shell;
 
         try {
-          const iframe = shell.querySelector("iframe");
-          const fullscreenTarget = iframe || shell;
-          try {
-            // Minimal console trace to help diagnose mobile fullscreen availability.
-            console.debug("toggleFullscreen: availability", {
-              iframe: Boolean(iframe),
-              requestFullscreen: Boolean(fullscreenTarget && fullscreenTarget.requestFullscreen),
-              webkitRequestFullscreen: Boolean(fullscreenTarget && fullscreenTarget.webkitRequestFullscreen),
-              webkitEnterFullscreen: Boolean(fullscreenTarget && fullscreenTarget.webkitEnterFullscreen)
-            });
-          } catch (_) {}
-
-          if (document.fullscreenElement || document.webkitFullscreenElement) {
-            document.exitFullscreen?.();
-            document.webkitExitFullscreen?.();
-            return;
-          }
-
-          if (fullscreenTarget && fullscreenTarget.requestFullscreen) {
-            fullscreenTarget.requestFullscreen().catch(() => {});
-          } else if (fullscreenTarget && fullscreenTarget.webkitRequestFullscreen) {
-            fullscreenTarget.webkitRequestFullscreen();
-          } else if (fullscreenTarget && fullscreenTarget.webkitEnterFullscreen) {
-            fullscreenTarget.webkitEnterFullscreen();
-          } else if (iframe && iframe.webkitRequestFullscreen) {
-            iframe.webkitRequestFullscreen();
-          }
+          console.debug("toggleFullscreen: availability", {
+            iframe: Boolean(iframe),
+            iframeRequestFullscreen: Boolean(iframe && iframe.requestFullscreen),
+            iframeWebkitRequestFullscreen: Boolean(iframe && iframe.webkitRequestFullscreen),
+            iframeWebkitEnterFullscreen: Boolean(iframe && iframe.webkitEnterFullscreen),
+            shellRequestFullscreen: Boolean(fullscreenTarget && fullscreenTarget.requestFullscreen),
+            shellWebkitRequestFullscreen: Boolean(fullscreenTarget && fullscreenTarget.webkitRequestFullscreen),
+            shellWebkitEnterFullscreen: Boolean(fullscreenTarget && fullscreenTarget.webkitEnterFullscreen)
+          });
         } catch (_) {}
+
+        const isCurrentlyFullscreen = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+        if (isCurrentlyFullscreen) {
+          document.exitFullscreen?.();
+          document.webkitExitFullscreen?.();
+          return;
+        }
+
+        const fallbackFullscreen = () => {
+          const isActive = shell.classList.toggle("is-fullscreen-fallback");
+          if (fullscreenBtn) {
+            fullscreenBtn.classList.toggle("is-active", isActive);
+            fullscreenBtn.setAttribute("aria-pressed", String(isActive));
+          }
+          document.body.classList.toggle("video-fullscreen-fallback-active", isActive);
+        };
+
+        const tryFullscreen = async (target) => {
+          if (!target) return false;
+          try {
+            if (target.requestFullscreen) {
+              await target.requestFullscreen();
+              return true;
+            }
+            if (target.webkitRequestFullscreen) {
+              target.webkitRequestFullscreen();
+              return true;
+            }
+            if (target.webkitEnterFullscreen) {
+              target.webkitEnterFullscreen();
+              return true;
+            }
+          } catch (error) {
+            console.debug("toggleFullscreen: fullscreen API failed", error);
+          }
+          return false;
+        };
+
+        if (await tryFullscreen(iframe) || await tryFullscreen(fullscreenTarget)) {
+          return;
+        }
+
+        fallbackFullscreen();
       };
 
       fullscreenBtn.addEventListener("click", toggleFullscreen);
