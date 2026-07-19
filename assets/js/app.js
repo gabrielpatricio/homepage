@@ -150,12 +150,20 @@
   function syncOrientationGuard() {
     if (!els.orientationGuard) return;
     const isLandscape = window.matchMedia("(orientation: landscape)").matches;
-    const isFsActive = document.body.classList.contains("video-fullscreen-active") || document.body.classList.contains("video-fullscreen-fallback-active");
+    const isFsActive = hasVideoFullscreenActive();
     const shouldBlock = shouldLockPortraitOnMobile() && isLandscape && !isFsActive;
 
+    syncVideoFullscreenBodyState();
     els.orientationGuard.hidden = !shouldBlock;
     els.orientationGuard.setAttribute("aria-hidden", shouldBlock ? "false" : "true");
     els.body.classList.toggle("orientation-guard-active", shouldBlock);
+  }
+
+  function scheduleOrientationGuardSync() {
+    syncOrientationGuard();
+    window.requestAnimationFrame(syncOrientationGuard);
+    window.setTimeout(syncOrientationGuard, 120);
+    window.setTimeout(syncOrientationGuard, 350);
   }
 
   async function attemptPortraitOrientationLock() {
@@ -527,7 +535,7 @@
       renderProjects();
       queueMobileBackdropScrollSync();
       ensureDesktopBackdropPlayback();
-      syncOrientationGuard();
+      scheduleOrientationGuardSync();
       attemptPortraitOrientationLock();
     }, 120));
     window.addEventListener("scroll", queueMobileBackdropScrollSync, { passive: true });
@@ -537,13 +545,15 @@
     window.addEventListener("touchmove", queueMobileBackdropScrollSync, { passive: true });
     els.showreel?.addEventListener("pointerdown", ensureMobileBackdropPlayback, { passive: true });
     els.showreel?.addEventListener("touchstart", ensureMobileBackdropPlayback, { passive: true });
-    window.addEventListener("orientationchange", syncOrientationGuard);
-    window.screen?.orientation?.addEventListener?.("change", syncOrientationGuard);
+    window.addEventListener("orientationchange", scheduleOrientationGuardSync);
+    window.screen?.orientation?.addEventListener?.("change", scheduleOrientationGuardSync);
+    document.addEventListener("fullscreenchange", scheduleOrientationGuardSync);
+    document.addEventListener("webkitfullscreenchange", scheduleOrientationGuardSync);
     window.addEventListener("pointerdown", unlockMobileAutoplayOnce, { once: true, passive: true });
     window.addEventListener("touchstart", unlockMobileAutoplayOnce, { once: true, passive: true });
     document.addEventListener("visibilitychange", () => {
       if (!document.hidden) {
-        syncOrientationGuard();
+        scheduleOrientationGuardSync();
         attemptPortraitOrientationLock();
         ensureMobileBackdropPlayback();
         ensureDesktopBackdropPlayback();
@@ -2763,7 +2773,7 @@
           syncVideoFullscreenBodyState();
           unlockScreenOrientation();
           exitDocumentFullscreen();
-          syncOrientationGuard();
+          scheduleOrientationGuardSync();
           return;
         }
 
@@ -2771,7 +2781,7 @@
         if (entered) {
           syncVideoFullscreenBodyState();
           await lockPortraitOrientation();
-          syncOrientationGuard();
+          scheduleOrientationGuardSync();
           return;
         }
 
@@ -2784,7 +2794,7 @@
         }
 
         await lockPortraitOrientation();
-        syncOrientationGuard();
+        scheduleOrientationGuardSync();
       };
 
       fullscreenBtn.addEventListener("click", toggleFullscreen);
@@ -3034,7 +3044,7 @@
           } else if (!hasVideoFullscreenActive()) {
             unlockScreenOrientation();
           }
-          syncOrientationGuard();
+          scheduleOrientationGuardSync();
         } catch (_) {
           // ignore orientation lock errors
         }
