@@ -1395,9 +1395,6 @@ body.route-showreel .project-stage-mobile-backdrop {
 }
 
 @media (orientation: portrait) {
-  .video-shell.is-fullscreen:not([data-orientation="vertical"]) .video-ratio iframe,
-  .video-shell:fullscreen:not([data-orientation="vertical"]) .video-ratio iframe,
-  .video-shell:-webkit-full-screen:not([data-orientation="vertical"]) .video-ratio iframe,
   .video-shell.is-fullscreen-fallback:not([data-orientation="vertical"]) .video-ratio iframe {
     position: absolute !important;
     top: 50% !important;

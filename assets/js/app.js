@@ -2779,6 +2779,7 @@
       pauseListeners: new Set()
     };
 
+    const isVertical = shell.dataset.orientation === "vertical";
     let hideControlsTimer = null;
     let onFsChange = null;
 
