@@ -7,7 +7,7 @@
   const galleryTracks = window.GALLERY_TRACKS || [];
   let youTubeApiPromise = null;
   const state = {
-    selectedFilters: new Set(data.filters),
+    selectedFilters: new Set(data.filters.filter((filter) => filter !== "All")),
     introPlayed: false,
     introIdleTimer: null,
     introReadyPromise: Promise.resolve(),
@@ -18,6 +18,9 @@
     projectStillsPage: 0,
     projectStillsPerPage: 3,
     projectStillViewerOpen: false,
+    projectStillViewerItems: [],
+    projectStillViewerIndex: 0,
+    projectStillViewerTouchStartX: null,
     chapterPlayers: [],
     customVideoControllers: [],
     stillsScrollHandler: null,
@@ -55,6 +58,7 @@
       interactionLockUntil: 0,
       timer: null,
       buildTimer: null,
+      hintTimer: null,
       dragState: null
     }
   };
@@ -93,8 +97,12 @@
     projectStillViewerBackdrop: document.getElementById("project-still-viewer-backdrop"),
     projectStillViewerImage: document.getElementById("project-still-viewer-image"),
     projectStillViewerClose: document.getElementById("project-still-viewer-close"),
+    projectStillViewerPrevious: document.getElementById("project-still-viewer-previous"),
+    projectStillViewerNext: document.getElementById("project-still-viewer-next"),
+    projectStillViewerCounter: document.getElementById("project-still-viewer-counter"),
     galleryOverlay: document.getElementById("gallery-overlay"),
     photoStage: document.getElementById("photo-stage"),
+    galleryCompositionHint: document.getElementById("gallery-composition-hint"),
     albumName: document.getElementById("album-name"),
     albumDetails: document.getElementById("album-details"),
     galleryAudio: document.getElementById("gallery-audio"),
@@ -493,6 +501,26 @@
     }, { once: true });
   }
 
+  function updateProjectStillViewer() {
+    const items = state.projectStillViewerItems;
+    const item = items[state.projectStillViewerIndex];
+    if (!item || !els.projectStillViewerImage) return;
+
+    els.projectStillViewerImage.src = item.src;
+    els.projectStillViewerImage.alt = item.alt;
+    els.projectStillViewerCounter.textContent = `${state.projectStillViewerIndex + 1} / ${items.length}`;
+    els.projectStillViewerPrevious.disabled = items.length < 2;
+    els.projectStillViewerNext.disabled = items.length < 2;
+  }
+
+  function navigateProjectStillViewer(direction) {
+    const total = state.projectStillViewerItems.length;
+    if (!state.projectStillViewerOpen || total < 2) return;
+
+    state.projectStillViewerIndex = (state.projectStillViewerIndex + direction + total) % total;
+    updateProjectStillViewer();
+  }
+
   function openProjectStillViewer(src, alt) {
     if (!src || !els.projectStillViewer || !els.projectStillViewerImage) return;
 
@@ -507,8 +535,12 @@
       els.projectOverlay.scrollTo({ top: Math.max(0, targetTop), behavior: "auto" });
     }
 
-    els.projectStillViewerImage.src = src;
-    els.projectStillViewerImage.alt = alt || "Project still";
+    const sourceIndex = state.projectStillViewerItems.findIndex((item) => item.src === src);
+    state.projectStillViewerIndex = sourceIndex >= 0 ? sourceIndex : 0;
+    if (sourceIndex < 0) {
+      state.projectStillViewerItems = [{ src, alt: alt || "Project still" }];
+    }
+    updateProjectStillViewer();
     els.projectStillViewer.hidden = false;
     els.projectStillViewer.setAttribute("aria-hidden", "false");
     els.projectOverlay.classList.add("still-viewer-open");
@@ -522,8 +554,10 @@
     els.projectStillViewer.setAttribute("aria-hidden", "true");
     els.projectStillViewerImage.removeAttribute("src");
     els.projectStillViewerImage.alt = "";
+    els.projectStillViewerCounter.textContent = "";
     els.projectOverlay.classList.remove("still-viewer-open");
     state.projectStillViewerOpen = false;
+    state.projectStillViewerTouchStartX = null;
   }
 
   function assignProjectIndexes() {
@@ -643,6 +677,35 @@
 
     els.projectStillViewerBackdrop?.addEventListener("click", closeProjectStillViewer);
     els.projectStillViewerClose?.addEventListener("click", closeProjectStillViewer);
+    els.projectStillViewer.addEventListener("click", (event) => {
+      const target = event.target;
+      if (target === els.projectStillViewerImage || target.closest?.(".project-still-viewer__navigation")) return;
+      closeProjectStillViewer();
+    });
+    els.projectStillViewerPrevious?.addEventListener("click", () => navigateProjectStillViewer(-1));
+    els.projectStillViewerNext?.addEventListener("click", () => navigateProjectStillViewer(1));
+    els.projectStillViewer.addEventListener("touchstart", (event) => {
+      state.projectStillViewerTouchStartX = event.changedTouches[0]?.clientX ?? null;
+    }, { passive: true });
+    els.projectStillViewer.addEventListener("touchend", (event) => {
+      if (state.projectStillViewerTouchStartX === null) return;
+
+      const endX = event.changedTouches[0]?.clientX ?? state.projectStillViewerTouchStartX;
+      const deltaX = endX - state.projectStillViewerTouchStartX;
+      state.projectStillViewerTouchStartX = null;
+      if (Math.abs(deltaX) < 44) return;
+      navigateProjectStillViewer(deltaX < 0 ? 1 : -1);
+    }, { passive: true });
+    window.addEventListener("keydown", (event) => {
+      if (!state.projectStillViewerOpen) return;
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        navigateProjectStillViewer(-1);
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        navigateProjectStillViewer(1);
+      }
+    });
 
     els.creditsToggle.addEventListener("click", () => {
       const expanded = els.creditsToggle.getAttribute("aria-expanded") === "true";
@@ -859,23 +922,24 @@
   function renderFilters() {
     els.filterList.innerHTML = "";
     data.filters.forEach((filter) => {
-      const id = `filter-${filter.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
-      const label = document.createElement("label");
-      label.className = "filter-item";
-      label.innerHTML = `
-        <input id="${id}" type="checkbox" checked />
-        <span>${filter}</span>
-      `;
-      const input = label.querySelector("input");
-      input.addEventListener("change", () => {
-        if (input.checked) {
-          state.selectedFilters.add(filter);
-        } else {
-          state.selectedFilters.delete(filter);
-        }
+      const button = document.createElement("button");
+      button.className = "filter-item";
+      button.type = "button";
+      button.textContent = filter.toLowerCase();
+      button.dataset.filter = filter;
+      button.setAttribute("aria-pressed", filter === "All" ? "true" : "false");
+      button.addEventListener("click", () => {
+        const isAll = filter === "All";
+        state.selectedFilters = new Set(isAll ? data.filters.filter((item) => item !== "All") : [filter]);
+        els.filterList.querySelectorAll(".filter-item").forEach((item) => {
+          const selected = item.dataset.filter === filter;
+          item.classList.toggle("is-selected", selected);
+          item.setAttribute("aria-pressed", String(selected));
+        });
         updateProjectVisibility();
       });
-      els.filterList.appendChild(label);
+      button.classList.toggle("is-selected", filter === "All");
+      els.filterList.appendChild(button);
     });
   }
 
@@ -924,7 +988,14 @@
       els.projectStage.appendChild(node);
       state.projectNodeMap.set(project.slug, node);
 
-      const size = estimateProjectSize(project);
+      const measuredSize = {
+        width: node.offsetWidth || estimateProjectSize(project).width,
+        height: node.offsetHeight || estimateProjectSize(project).height
+      };
+      const size = {
+        width: measuredSize.width + 56,
+        height: measuredSize.height + 56
+      };
       const pos = findNonOverlappingPosition(project.slug, size, bounds, placed, index);
       node.style.left = `${pos.x}px`;
       node.style.top = `${pos.y}px`;
@@ -932,8 +1003,15 @@
       node.style.setProperty("--float-y", `${pos.floatY}px`);
       node.style.setProperty("--float-duration", `${pos.duration}s`);
       node.style.setProperty("--float-delay", `${pos.delay}s`);
-      placed.push({ ...pos, width: size.width, height: size.height });
+      placed.push({
+        ...pos,
+        node,
+        width: measuredSize.width,
+        height: measuredSize.height
+      });
     });
+
+    constrainDesktopNodeMotion(placed);
 
     updateProjectVisibility();
   }
@@ -1552,7 +1630,19 @@
     const columnCount = Math.max(1, Math.floor((availableWidth + 24) / Math.max(190, size.width + 20)));
     const rowCount = Math.max(1, Math.floor((availableHeight + 16) / Math.max(84, size.height + 14)));
     const slotCount = Math.max(1, columnCount * rowCount);
-    const safeIndex = index % slotCount;
+    const slotIndexes = Array.from({ length: slotCount }, (_, slotIndex) => (slotIndex + index) % slotCount);
+    const fallbackSlot = slotIndexes.find((slotIndex) => {
+      const col = slotIndex % columnCount;
+      const row = Math.floor(slotIndex / columnCount);
+      const candidate = {
+        x: safeMinX + (columnCount === 1 ? availableWidth / 2 : (availableWidth * col) / (columnCount - 1)),
+        y: safeMinY + (rowCount === 1 ? availableHeight / 2 : (availableHeight * row) / (rowCount - 1)),
+        width: size.width,
+        height: size.height
+      };
+      return !placed.some((box) => boxesOverlap(candidate, box, 34));
+    });
+    const safeIndex = fallbackSlot ?? (index % slotCount);
     const col = safeIndex % columnCount;
     const row = Math.floor(safeIndex / columnCount);
     const fallbackX = safeMinX + (columnCount === 1 ? availableWidth / 2 : (availableWidth * col) / (columnCount - 1));
@@ -1575,6 +1665,48 @@
       a.y + a.height + padding < b.y ||
       a.y > b.y + b.height + padding
     );
+  }
+
+  function getMotionBounds(node) {
+    const minX = Math.min(0, node.floatX || 0);
+    const minY = Math.min(0, node.floatY || 0);
+    const maxX = Math.max(0, node.floatX || 0);
+    const maxY = Math.max(0, node.floatY || 0);
+
+    return {
+      x: node.x + minX,
+      y: node.y + minY,
+      width: node.width + maxX - minX,
+      height: node.height + maxY - minY
+    };
+  }
+
+  function constrainDesktopNodeMotion(nodes) {
+    const activeNodes = nodes.filter((node) => node.node);
+    let changed = true;
+    let guard = 0;
+
+    while (changed && guard < activeNodes.length * 2) {
+      changed = false;
+      guard += 1;
+
+      for (let index = 0; index < activeNodes.length; index += 1) {
+        for (let otherIndex = index + 1; otherIndex < activeNodes.length; otherIndex += 1) {
+          const current = activeNodes[index];
+          const other = activeNodes[otherIndex];
+          if (!boxesOverlap(getMotionBounds(current), getMotionBounds(other), 8)) continue;
+
+          const currentMotion = Math.abs(current.floatX || 0) + Math.abs(current.floatY || 0);
+          const otherMotion = Math.abs(other.floatX || 0) + Math.abs(other.floatY || 0);
+          const reroute = currentMotion <= otherMotion ? current : other;
+          reroute.floatX = 0;
+          reroute.floatY = 0;
+          reroute.node.style.setProperty("--float-x", "0px");
+          reroute.node.style.setProperty("--float-y", "0px");
+          changed = true;
+        }
+      }
+    }
   }
 
   function activateProjectHover(link, project) {
@@ -1644,7 +1776,7 @@
     const hash = location.hash.replace(/^#/, "");
     const [route, slug] = hash.split("/");
 
-    document.body.classList.remove("route-showreel", "route-35mm", "route-about", "route-project");
+    document.body.classList.remove("route-showreel", "route-photography", "route-about", "route-project");
 
     if (!route || route === "") {
       if (!document.body.classList.contains("intro-complete")) {
@@ -1669,14 +1801,14 @@
       return;
     }
 
-    if (route === "35mm") {
+    if (route === "photography") {
       stopMobileBackdropKeepAlive();
       stopMobileBackdropCycle();
       stopDesktopBackdropKeepAlive();
       closeAllOverlays();
       els.galleryOverlay.classList.add("active");
       els.galleryOverlay.setAttribute("aria-hidden", "false");
-      document.body.classList.add("route-35mm");
+      document.body.classList.add("route-photography");
       lockPageScroll();
       openGallery();
       return;
@@ -1811,10 +1943,14 @@
     const hasSubtitle = Boolean(project.subtitle);
     const hasCredits = Array.isArray(project.credits) && project.credits.length > 0;
     const hasStills = !project.hideStills && Array.isArray(project.stills) && project.stills.length > 0;
+    const hasVerticalVideo = String(project.orientation || "").trim().toLowerCase().startsWith("v")
+      || (Array.isArray(project.videoOrientation)
+        && project.videoOrientation.some((orientation) => String(orientation).trim().toLowerCase().startsWith("v")));
 
     els.projectPanel.classList.toggle("is-full-page", isFullPage);
     els.projectPanel.classList.toggle("is-chapter-page", isChapterPage);
     els.projectPanel.classList.toggle("has-stills", hasStills);
+    els.projectPanel.classList.toggle("has-vertical-stills", hasStills && hasVerticalVideo);
     els.projectOverlay.classList.toggle("is-full-page-project", isFullPage);
     els.projectOverlay.classList.toggle("is-chapter-page-project", isChapterPage);
     els.projectType.textContent = project.type;
@@ -2064,6 +2200,7 @@
 
     els.projectStillsGrid.innerHTML = "";
     els.projectStillsShell.hidden = !hasStills;
+    els.projectStillsShell.classList.toggle("is-visible", hasStills && hasVerticalVideo);
     els.projectStillsGrid.hidden = !hasStills;
     if (hasStills) {
       renderProjectStillsPage(project);
@@ -2560,6 +2697,10 @@
     const perPage = state.projectStillsPerPage;
     const totalPages = Math.max(1, totalStills - perPage + 1);
     state.projectStillsPage = 0;
+    state.projectStillViewerItems = stills.map((src, index) => ({
+      src,
+      alt: `${project.title} still ${index + 1}`
+    }));
 
     if (state.stillsScrollHandler) {
       els.projectStillsGrid.removeEventListener("scroll", state.stillsScrollHandler);
@@ -3556,6 +3697,10 @@
     els.albumDetails.textContent = "";
     renderGallery();
     startGalleryAlbum(getNextAlbumIndex());
+    state.gallery.hintTimer = window.setTimeout(() => {
+      els.galleryCompositionHint?.classList.add("is-visible");
+      state.gallery.hintTimer = null;
+    }, 4200);
 
     playGalleryAudio();
   }
@@ -3570,7 +3715,7 @@
     }
 
     if (event.code !== "Space") return;
-    if (!document.body.classList.contains("route-35mm")) return;
+    if (!document.body.classList.contains("route-photography")) return;
 
     const target = event.target;
     if (
@@ -3603,6 +3748,11 @@
       window.clearTimeout(state.gallery.buildTimer);
       state.gallery.buildTimer = null;
     }
+    if (state.gallery.hintTimer) {
+      window.clearTimeout(state.gallery.hintTimer);
+      state.gallery.hintTimer = null;
+    }
+    els.galleryCompositionHint?.classList.remove("is-visible");
   }
 
   function buildAlbumQueue() {
@@ -3952,7 +4102,7 @@
 
     state.gallery.currentTrackQueueIndex += 1;
     loadGalleryTrack();
-    if (document.body.classList.contains("route-35mm")) {
+    if (document.body.classList.contains("route-photography")) {
       els.galleryAudio.play().catch(() => {});
     }
   }

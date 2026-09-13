@@ -11,11 +11,12 @@ window.PORTFOLIO_DATA = {
   },
 
   filters: [
-    "Social Media Brand Content",
+    "All",
+    "Social Content",
     "Music Video",
     "Short Film",
     "Visual Storytelling",
-    "Corporate Video"
+    "Brand Film"
   ],
 
   projects: [
@@ -192,6 +193,7 @@ window.PORTFOLIO_DATA = {
     {
       slug: "bennywine-can-i-take-you-away",
       title: "bennywine - can i take you away",
+      hidden: true,
       role: "Videographer / Editor",
       year: "2025",
       type: "Music Video",
@@ -400,8 +402,8 @@ window.PORTFOLIO_DATA = {
       hideStills: true,
       role: "Videographer / Editor",
       year: "2025",
-      type: "Corporate Video",
-      categories: ["Corporate Video"],
+      type: "Brand Film",
+      categories: ["Brand Film"],
       highlight: 1,
       duration: "01:57",
       client: "Monday Merch",
@@ -567,10 +569,10 @@ window.PORTFOLIO_DATA = {
       title: "monday merch",
       fullPage: true,
       hideStills: true,
-      role: "Videographer/Photographer",
+      role: "Videographer/Editor",
       year: "2025/26",
-      type: "Social Media Brand Content",
-      categories: ["Social Media Brand Content"],
+      type: "Social Content",
+      categories: ["Social Content"],
       highlight: 1,
       duration: "",
       client: "Monday Merch",
@@ -656,8 +658,8 @@ window.PORTFOLIO_DATA = {
       hideStills: true,
       role: "Videographer / Editor",
       year: "2026",
-      type: "Corporate Video",
-      categories: ["Corporate Video"],
+      type: "Brand Film",
+      categories: ["Brand Film"],
       highlight: 1,
       duration: "02:13",
       client: "Monday Merch",
@@ -678,10 +680,10 @@ window.PORTFOLIO_DATA = {
       title: "healthy freaks - powered by HOKA",
       role: "Videographer / Editor",
       year: "2026",
-      type: "Social Media Brand Content",
+      type: "Social Content",
       orientation: "vertical",
       hideStills: true,
-      categories: ["Social Media Brand Content", "Visual Storytelling"],
+      categories: ["Social Content"],
       highlight: 1,
       duration: "01:00",
       client: "Healthy Freaks",
@@ -703,8 +705,8 @@ window.PORTFOLIO_DATA = {
       title: "nown x monday merch - success stories",
       role: "Videographer / Editor",
       year: "2026",
-      type: "Corporate Video",
-      categories: ["Corporate Video"],
+      type: "Brand Film",
+      categories: ["Brand Film"],
       highlight: 1,
       duration: "02:28",
       client: "Monday Merch",
@@ -725,52 +727,167 @@ window.PORTFOLIO_DATA = {
     },
      {
       slug: "choir-videoclip",
-      title: "Choir Videoclip",
-      hidden: true,
-      role: "Camera B ",
-      year: "2025",
+      title: "the space choir - pure love (live concert)",
+      hideStills: true,
+      role: "Camera Operator",
+      year: "2026",
       type: "Music Video",
       categories: ["Music Video"],
       highlight: 1,
       duration: "",
-      client: "Rawkost Film Production",
+      client: "The Space Choir",
+      subtitle: "",
+      description: "",
+      credits: [
+        "Conductors - Lucas Vermeer, Danique van der Vlugt, Rolinde Zieverink, Sophia Schutte",
+        "Keys - Margi Sinniah",
+        "Bass - Mees Booden",
+        "Drums - Dries Verheesen",
+        "Guitar - Anne Roos Peterse",
+        "Choir Arrangements - Lucas Vermeer",
+        "Producers & Mixers - Lucas Vermeer, Sjoerd Huissoon",
+        "Mastering - Ivo Stantinski",
+        "Visuals - Rauwkost Film, Eloi Genrich, Stein Boon, Maxime van Erp, Levien Priem, Gabriel Patricio",
+        "Production - Eva Hoogkamer, Sam Ouwehand",
+        "Venue - Amare",
+        "Lighting - Timon ter Wijlen, Jop Kuipers",
+        "FOH Audio - Absolute Audio"
+      ],
+     videoEmbed: "https://www.youtube.com/embed/vPvmOY-me4w?si=wvb0m_v15d4m9Nsf",
+      stills: [
+        "assets/media/projects/choir-videoclip/stills/1.jpeg",
+        "assets/media/projects/choir-videoclip/stills/2.jpeg",
+        "assets/media/projects/choir-videoclip/stills/3.jpeg" 
+      ]
+    },
+     {
+      slug: "benny-sara-popup",
+      title: "benny & sara - popup experience",
+      role: "Videographer / Editor / Film Photographer",
+      year: "2026",
+      hideStills: false,
+      type: "Social Content",
+      orientation: "vertical",
+      categories: ["Social Content"],
+      highlight: 1,
+      duration: "00:30",
+      client: "NAVE",
+      subtitle: "",
+      description: "Filmed and photographed at NAVE in Porto, this piece captures the one-night pop-up hosted by chefs Benny and Sara, a collision of Mediterranean and Asian flavours that turned the restaurant into something entirely their own. Video coverage and 35mm photography by Gabriel Patrício.",      credits: [
+        "Videographer, Film Photographer & Editor - Gabriel Patrício"
+      ],
+     videoEmbed: "https://player.vimeo.com/video/1210213561?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&autoplay=1",
+      stills: [
+        "assets/media/projects/benny-sara-popup/stills/1.jpeg",
+        "assets/media/projects/benny-sara-popup/stills/2.jpeg",
+        "assets/media/projects/benny-sara-popup/stills/3.jpeg",
+        "assets/media/projects/benny-sara-popup/stills/5.jpeg",
+        "assets/media/projects/benny-sara-popup/stills/6.jpeg",
+        "assets/media/projects/benny-sara-popup/stills/7.jpeg",
+        "assets/media/projects/benny-sara-popup/stills/8.jpeg",
+        "assets/media/projects/benny-sara-popup/stills/9.jpeg",
+        "assets/media/projects/benny-sara-popup/stills/10.jpeg",
+        "assets/media/projects/benny-sara-popup/stills/11.jpeg",
+        "assets/media/projects/benny-sara-popup/stills/12.jpeg"    
+      ]
+    },
+       {
+      slug: "adbsafegate-interview",
+      title: "adb safegate x monday merch - success stories",
+      role: "Videographer / Editor",
+      year: "2026",
+      type: "Brand Film",
+      categories: ["Brand Film"],
+      highlight: 1,
+      duration: "01:45",
+      client: "Monday Merch",
+      subtitle: "",
+description: "Filmed at ADB SAFEGATE's headquarters in Belgium and directed, shot, and edited by Gabriel Patrício, this piece profiles Global Marketing Director Ilya Burkin on how the world's leading airside technology company partnered with Monday Merch to turn scattered local merchandise orders across 175 countries into one consistent global programme.",      credits: [
+        "Guest - Ilya Burkin",
+        "Director, Videographer & Editor - Gabriel Patrício"
+      ],
+      videoEmbed: "https://player.vimeo.com/video/1226339645?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&autoplay=1",
+      stills: [
+        "assets/media/projects/adbsafegate-interview/stills/1.jpeg",
+        "assets/media/projects/adbsafegate-interview/stills/2.jpeg",
+        "assets/media/projects/adbsafegate-interview/stills/3.jpeg",
+        "assets/media/projects/adbsafegate-interview/stills/4.jpeg",
+        "assets/media/projects/adbsafegate-interview/stills/5.jpeg"
+
+      ]
+    },
+    {
+      slug: "illimone-interview",
+      title: "il limone x monday merch - success stories",
+      role: "Videographer / Editor",
+      year: "2026",
+      type: "Brand Film",
+      categories: ["Brand Film"],
+      highlight: 1,
+      duration: "01:20",
+      client: "Monday Merch",
+      subtitle: "",
+description: "Filmed at Il Limone in Breda and directed, shot, and edited by Gabriel Patrício, this piece follows owner Chiara Cappellano on the story behind her Italian delicatessen and its partnership with Monday Merch on custom crewnecks for the entire team - a Christmas gift that became a symbol of the squadra.",
+      credits: [
+        "Guest - Chiara Cappellano",
+        "Director, Videographer & Editor - Gabriel Patrício"
+      ],
+      videoEmbed: "https://player.vimeo.com/video/1226268108?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&autoplay=1",
+      stills: [
+        "assets/media/projects/illimone-interview/stills/1.jpeg",
+        "assets/media/projects/illimone-interview/stills/2.jpeg",
+        "assets/media/projects/illimone-interview/stills/3.jpeg",
+        "assets/media/projects/illimone-interview/stills/4.jpeg",
+        "assets/media/projects/illimone-interview/stills/5.jpeg",
+        "assets/media/projects/illimone-interview/stills/6.jpeg",
+        "assets/media/projects/illimone-interview/stills/7.jpeg"
+
+      ]
+    },
+    {
+      slug: "carpediem",
+      title: "Carp Diem",
+      hidden: true,
+      role: "Gaffer",
+      year: "2026",
+      type: "Short Film",
+      categories: ["Short Film"],
+      highlight: 1,
+      duration: "",
+      client: "Jorick Buurstra",
       subtitle: "",
       description: "",
       credits: [
       ],
      videoEmbed: "",
       stills: [
-        "assets/media/projects/choir-videoclip/stills/1.jpeg",
-        "assets/media/projects/choir-videoclip/stills/2.jpeg",
-        "assets/media/projects/choir-videoclip/stills/3.jpeg"      
+        "assets/media/projects/carpediem/stills/1.jpeg",
+        "assets/media/projects/carpediem/stills/2.jpeg",
+        "assets/media/projects/carpediem/stills/3.jpeg"      
       ]
     },
      {
-      slug: "benny-sara-popup",
-      title: "Benny & Sara - Popup Experience",
+      slug: "mavka",
+      title: "Mavka Inked",
       hidden: true,
       role: "Videographer / Editor",
       year: "2026",
-      type: "Social Media Brand Content",
-      orientation: "vertical",
-      hideStills: true,
-      categories: ["Social Media Brand Content", "Visual Storytelling"],
+      type: "Social Content",
+      categories: ["Social Content"],
       highlight: 1,
-      duration: "01:00",
-      client: "Healthy Freaks",
+      duration: "",
+      client: "Mavka Inked",
       subtitle: "",
-      description: "A 1-minute promotional video for Healthy Freaks, powered by HOKA. I worked as Videographer and Editor pairing with Kirian Dhyan Hirsiger, capturing dynamic shots and crafting a compelling visual narrative.",
+      description: "",
       credits: [
-        "Director, Videographer & Editor - Gabriel Patrício & Kirian Hirsiger"
       ],
-     videoEmbed: "https://player.vimeo.com/video/1192429653?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479&autoplay=1",
+     videoEmbed: "",
       stills: [
-        "assets/media/projects/healthyfeaks-hoka/stills/1.png",
-        "assets/media/projects/healthyfeaks-hoka/stills/2.png",
-        "assets/media/projects/healthyfeaks-hoka/stills/3.png",
-        "assets/media/projects/healthyfeaks-hoka/stills/5.png"    
+        "assets/media/projects/mavka/stills/1.jpeg",
+        "assets/media/projects/mavka/stills/2.jpeg",
+        "assets/media/projects/mavka/stills/3.jpeg"      
       ]
-    }
+    },
   ],
 
   photoAlbums: (window.PHOTO_ALBUMS || []).map((album) => ({

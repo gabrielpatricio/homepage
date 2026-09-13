@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>gapa studio</title>
-  <meta name="description" content="gapa studio is the portfolio of Gabriel Patrício, a filmmaker and visual artist based in Rotterdam, with selected work in showreel and 35mm." />
+  <meta name="description" content="gapa studio is the portfolio of Gabriel Patrício, a filmmaker and visual artist based in Rotterdam, with selected work in showreel and photography." />
   <meta property="og:title" content="gapa studio" />
-  <meta property="og:description" content="gapa studio is the portfolio of Gabriel Patrício, a filmmaker and visual artist based in Rotterdam, with selected work in showreel and 35mm." />
-  <meta name="twitter:description" content="gapa studio is the portfolio of Gabriel Patrício, a filmmaker and visual artist based in Rotterdam, with selected work in showreel and 35mm." />
+  <meta property="og:description" content="gapa studio is the portfolio of Gabriel Patrício, a filmmaker and visual artist based in Rotterdam, with selected work in showreel and photography." />
+  <meta name="twitter:description" content="gapa studio is the portfolio of Gabriel Patrício, a filmmaker and visual artist based in Rotterdam, with selected work in showreel and photography." />
   <script>
     (() => {
       const OLD_HOSTS = new Set(["gabrielpatricio.com", "www.gabrielpatricio.com"]);
@@ -31,18 +31,18 @@
 
       <button id="logo-trigger" class="logo-trigger" aria-label="Enter gapa studio">
         <span class="logo-split logo-top">
-          <img src="assets/logo/gapa_smooth_fixed.svg" alt="gapa studio logo" class="landing-logo" />
+          <img src="assets/logo/gapa_static.svg" alt="gapa studio logo" class="landing-logo" />
         </span>
         <span class="logo-divider" aria-hidden="true"></span>
         <span class="logo-split logo-bottom">
-          <img src="assets/logo/gapa_smooth_fixed.svg" alt="" class="landing-logo" />
+          <img src="assets/logo/gapa_static.svg" alt="" class="landing-logo" />
         </span>
       </button>
     </section>
 
     <nav id="corner-nav" class="corner-nav" aria-label="Main navigation">
       <a href="#showreel" class="corner-link corner-top-left" data-route="showreel">showreel</a>
-      <a href="#35mm" class="corner-link corner-top-right" data-route="35mm">35 mm</a>
+      <a href="#photography" class="corner-link corner-top-right" data-route="photography">photography</a>
       <a href="#about" class="corner-link corner-bottom-left" data-route="about">about me</a>
       <div class="corner-link corner-bottom-right social-cluster" aria-label="Social links">
         <a class="icon-link" href="#" target="_blank" rel="noreferrer" data-social="instagram" aria-label="Instagram"></a>
@@ -55,12 +55,11 @@
       <div class="showreel-watermark" aria-hidden="true"></div>
 
       <div class="showreel-mobile-header">
-        <img src="assets/logo/gapa_smooth_fixed.svg" alt="gapa studio logo" class="showreel-logo" />
+        <img src="assets/logo/gapa_static.svg" alt="gapa studio logo" class="showreel-logo" />
         <p class="showreel-subtitle">showreel</p>
       </div>
 
       <aside class="filter-sidebar" aria-label="Project filters">
-        <p class="filter-label">Filters</p>
         <div id="filter-list" class="filter-list"></div>
       </aside>
 
@@ -107,15 +106,21 @@
         <button id="project-still-viewer-backdrop" class="project-still-viewer__backdrop" type="button" aria-label="Close still viewer">close</button>
         <figure class="project-still-viewer__content">
           <img id="project-still-viewer-image" class="project-still-viewer__image" alt="" />
+          <div class="project-still-viewer__navigation" aria-label="Still navigation">
+            <button id="project-still-viewer-previous" class="project-still-viewer__arrow" type="button" aria-label="Previous still">&#8592;</button>
+            <span id="project-still-viewer-counter" class="project-still-viewer__counter" aria-live="polite"></span>
+            <button id="project-still-viewer-next" class="project-still-viewer__arrow" type="button" aria-label="Next still">&#8594;</button>
+          </div>
         </figure>
       </div>
     </section>
 
     <section id="gallery-overlay" class="overlay-page gallery-overlay" aria-hidden="true">
-      <button class="close-overlay" data-close-overlay="gallery" aria-label="Close 35mm">close</button>
+      <button class="close-overlay" data-close-overlay="gallery" aria-label="Close photography">close</button>
       <div class="overlay-backdrop"></div>
       <div class="overlay-panel gallery-panel">
-        <div id="photo-stage" class="photo-stage" aria-label="35mm gallery"></div>
+        <div id="photo-stage" class="photo-stage" aria-label="Photography gallery"></div>
+        <p id="gallery-composition-hint" class="gallery-composition-hint">press spacebar drag some pictures around, make it your own composition</p>
 
         <div class="gallery-footer gallery-footer-left">
           <h2 id="album-name">—</h2>

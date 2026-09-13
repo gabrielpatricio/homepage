@@ -411,7 +411,22 @@ window.PHOTO_ALBUMS = [
       "000027.jpeg",
       "000028.jpeg",
       "000029.jpeg",
-      "000031.jpeg",
+      "000031.jpeg"
+    ]
+  },
+  {
+    "name": "Aarhus",
+    "details": "Canon A1 - Agfa 400 35mm",
+    "files": [
+      "1.jpeg",
+      "2.jpeg",
+      "3.jpeg",
+      "4.jpeg",
+      "5.jpeg",
+      "6.jpeg",
+      "7.jpeg",
+      "8.jpeg",
+      "9.jpeg"
     ]
   }
 ];
