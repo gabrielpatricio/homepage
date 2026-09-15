@@ -925,7 +925,7 @@
       const button = document.createElement("button");
       button.className = "filter-item";
       button.type = "button";
-      button.textContent = filter.toLowerCase();
+      button.textContent = filter === "All" ? "show all" : filter.toLowerCase();
       button.dataset.filter = filter;
       button.setAttribute("aria-pressed", filter === "All" ? "true" : "false");
       button.addEventListener("click", () => {
@@ -1985,12 +1985,11 @@
 
     rawEmbeds.forEach((rawUrl, index) => {
       const provider = detectVideoProvider(rawUrl);
-      const shouldUseCustomUi = !isChapterPage && (provider === "vimeo" || provider === "youtube");
       const isIPhone = isIPhoneDevice();
       const isMobileDevice = window.innerWidth <= 860;
       const shouldAutoplayDesktop =
         (isChapterPage && !isMobileDevice)
-        || (shouldUseCustomUi && !isFullPage)
+        || (!isChapterPage && !isFullPage)
         || (isFullPage && window.innerWidth > 640);
       // Unified mobile policy: only the first project video may autoplay.
       const shouldAutoplay = isIPhone ? false : (isMobileDevice ? index === 0 : shouldAutoplayDesktop);
@@ -1998,8 +1997,8 @@
       const videoUrl = normalizeEmbedUrl(rawUrl, {
         autoplay: shouldAutoplay,
         muted: shouldStartMuted,
-        customUI: !isChapterPage && (provider === "vimeo" || provider === "youtube"),
-        suppressNativeControls: isChapterPage
+        customUI: false,
+        suppressNativeControls: false
       });
       if (!videoUrl) return;
 
@@ -2007,7 +2006,7 @@
       shell.className = "video-shell";
       shell.dataset.orientation = orientations[index] || "horizontal";
       if (isFullPage) {
-        applyFullPageGridPlacement(shell, index, orientations, rawEmbeds.length);
+        applyFullPageGridPlacement(shell, index, orientations, rawEmbeds.length, project.slug);
       }
 
       const ratio = document.createElement("div");
@@ -2193,7 +2192,7 @@
     if (isChapterPage && window.innerWidth <= 860) {
       const chapterHint = document.createElement("p");
       chapterHint.className = "chapter-mobile-play-hint";
-      chapterHint.textContent = "For the best experience, press play on all videos to view them simultaneously.";
+      chapterHint.textContent = "For the best experience, play all videos simultaneously.";
       els.projectMedia.appendChild(chapterHint);
       // Fade-in delay, hold, and fade-out are handled entirely by the CSS animation.
     }
@@ -2249,16 +2248,6 @@
       }
     });
 
-    const existingFixedMuteButton = els.projectOverlay.querySelector(".fullpage-mobile-mute-toggle");
-    if (existingFixedMuteButton) existingFixedMuteButton.remove();
-
-    const fixedMuteButton = document.createElement("button");
-    fixedMuteButton.type = "button";
-    fixedMuteButton.className = "fullpage-mobile-mute-toggle";
-    fixedMuteButton.textContent = "mute";
-    fixedMuteButton.setAttribute("aria-label", "Mute video");
-    els.projectOverlay.appendChild(fixedMuteButton);
-
     const existingSwipeHint = els.projectOverlay.querySelector(".fullpage-mobile-swipe-hint");
     if (existingSwipeHint) existingSwipeHint.remove();
 
@@ -2267,7 +2256,6 @@
     swipeHint.textContent = "↓ swipe for more ↓";
     els.projectOverlay.appendChild(swipeHint);
 
-    let fixedMuteUnsubscribe = null;
     let swipeHintTimer = null;
 
     const hideSwipeHint = () => {
@@ -2279,40 +2267,6 @@
       swipeHintTimer = window.setTimeout(() => {
         swipeHint.classList.add("is-visible");
       }, 5000);
-    };
-
-    const setFixedMuteLabel = (isMuted) => {
-      fixedMuteButton.textContent = isMuted ? "unmute" : "mute";
-      fixedMuteButton.setAttribute("aria-label", isMuted ? "Unmute video" : "Mute video");
-    };
-
-    const bindFixedMuteToIndex = (index) => {
-      if (fixedMuteUnsubscribe) {
-        fixedMuteUnsubscribe();
-        fixedMuteUnsubscribe = null;
-      }
-
-      const shell = videoShells[index];
-      const info = shell ? videosMap.get(shell) : null;
-      const controller = info?.controller;
-      const hasMuteControl = controller
-        && typeof controller.setMuted === "function"
-        && typeof controller.isMuted === "function";
-
-      fixedMuteButton.disabled = !hasMuteControl;
-      fixedMuteButton.classList.toggle("is-disabled", !hasMuteControl);
-
-      if (!hasMuteControl) {
-        setFixedMuteLabel(false);
-        return;
-      }
-
-      setFixedMuteLabel(controller.isMuted());
-      if (typeof controller.onMuteChange === "function") {
-        fixedMuteUnsubscribe = controller.onMuteChange((muted) => {
-          setFixedMuteLabel(Boolean(muted));
-        });
-      }
     };
 
     const bindSwipeHintToIndex = (index) => {
@@ -2332,7 +2286,6 @@
       if (!currentInfo) return;
 
       currentVideoIndex = index;
-      bindFixedMuteToIndex(index);
       bindSwipeHintToIndex(index);
 
       if (currentInfo.controller && typeof currentInfo.controller.play === "function") {
@@ -2366,7 +2319,6 @@
             // leave Vimeo/YouTube showing a misleading loading state. Actual play
             // is triggered from the swipe gesture path instead.
             currentVideoIndex = index;
-            bindFixedMuteToIndex(index);
             bindSwipeHintToIndex(index);
           } else {
             // Video is 75%+ in view - play this one and pause others.
@@ -2498,17 +2450,6 @@
       touchGestureConsumed = false;
     };
 
-    fixedMuteButton.addEventListener("click", (event) => {
-      event.preventDefault();
-      const shell = videoShells[currentVideoIndex];
-      const info = shell ? videosMap.get(shell) : null;
-      const controller = info?.controller;
-      if (!controller || typeof controller.setMuted !== "function" || typeof controller.isMuted !== "function") {
-        return;
-      }
-      controller.setMuted(!controller.isMuted());
-    });
-
     els.projectOverlay.addEventListener("wheel", onWheel, { passive: false });
     els.projectOverlay.addEventListener("touchstart", onTouchStart, { passive: true });
     els.projectOverlay.addEventListener("touchmove", onTouchMove, { passive: false });
@@ -2519,19 +2460,13 @@
     setTimeout(() => {
       snapToVideo(0);
     }, 100);
-    bindFixedMuteToIndex(0);
     bindSwipeHintToIndex(0);
 
     // Store cleanup callback and observer for overlay close.
     state.fullPageAutoplayObserver = observer;
     state.fullPageVideosMap = videosMap;
     state.fullPageScrollHandler = () => {
-      if (fixedMuteUnsubscribe) {
-        fixedMuteUnsubscribe();
-        fixedMuteUnsubscribe = null;
-      }
       window.clearTimeout(swipeHintTimer);
-      fixedMuteButton.remove();
       swipeHint.remove();
       window.clearTimeout(wheelUnlockTimer);
       els.projectOverlay.removeEventListener("wheel", onWheel);
@@ -2796,7 +2731,7 @@
           const isMobileEmbed = window.innerWidth <= 860;
           // On desktop use background=1 for muted-autoplay (suppresses Vimeo's "Activate sound" prompt).
           // On mobile avoid background=1 because it also forces looping; use explicit muted param instead.
-          const useBackground = options.autoplay && options.muted !== false && !isMobileEmbed;
+          const useBackground = options.customUI && options.autoplay && options.muted !== false && !isMobileEmbed;
           if (useBackground) {
             parsed.searchParams.set("background", "1");
           } else {
@@ -2804,11 +2739,7 @@
             parsed.searchParams.set("byline", "0");
             parsed.searchParams.set("portrait", "0");
             parsed.searchParams.set("badge", "0");
-            // suppress native controls when we add our own; keep them for regular (non-chapter) videos
-            parsed.searchParams.set(
-              "controls",
-              options.autoplay || options.customUI || options.suppressNativeControls ? "0" : "1"
-            );
+            parsed.searchParams.set("controls", "1");
             parsed.searchParams.set("playsinline", "1");
             if (options.autoplay) {
               parsed.searchParams.set("autoplay", "1");
@@ -2829,7 +2760,7 @@
         parsed.searchParams.set("modestbranding", "1");
         parsed.searchParams.set("rel", "0");
         parsed.searchParams.set("playsinline", "1");
-        parsed.searchParams.set("fs", options.customUI ? "1" : "0");
+        parsed.searchParams.set("fs", "1");
         parsed.searchParams.set("iv_load_policy", "3");
         parsed.searchParams.set("enablejsapi", "1");
         parsed.searchParams.set("origin", window.location.origin);
@@ -3603,7 +3534,7 @@
     });
   }
 
-  function applyFullPageGridPlacement(shell, index, orientations, totalCount) {
+  function applyFullPageGridPlacement(shell, index, orientations, totalCount, projectSlug = "") {
     const groupIndex = Math.floor(index / 4);
     const groupStart = groupIndex * 4;
     const isCompleteGroup = groupStart + 3 < totalCount;
@@ -3613,6 +3544,18 @@
     shell.style.justifySelf = "";
     delete shell.dataset.groupPos;
     delete shell.dataset.middleLayout;
+
+    if (projectSlug === "monday-merch") {
+      const row = index < 3 ? 1 : index < 5 ? 2 : 3;
+      const isHorizontal = orientations[index] === "horizontal";
+      const position = isHorizontal ? index - 3 : index < 3 ? index : index - 5;
+      const columnStart = isHorizontal ? position * 3 + 1 : position * 2 + 1;
+      const columnSpan = isHorizontal ? 3 : 2;
+
+      shell.style.gridColumn = `${columnStart} / span ${columnSpan}`;
+      shell.style.gridRow = String(row);
+      return;
+    }
 
     if (!isCompleteGroup) return;
 

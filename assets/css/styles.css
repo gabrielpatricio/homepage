@@ -952,6 +952,13 @@ body.route-showreel .project-stage-mobile-backdrop {
   column-gap: 72px;
 }
 
+@media (min-width: 861px) {
+  .project-panel.is-full-page .project-video-grid[data-project-slug="monday-merch"] {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    column-gap: 18px;
+  }
+}
+
 .project-panel.is-full-page .project-video-grid .video-shell {
   width: 100%;
   margin: 0;
@@ -1220,11 +1227,13 @@ body.route-showreel .project-stage-mobile-backdrop {
 }
 
 .video-ui-layer {
-  position: absolute;
-  inset: 0;
-  z-index: 1000;
-  pointer-events: auto;
-  touch-action: manipulation;
+  display: none;
+}
+
+.video-play-ctrl,
+.video-mute-wrapper,
+.fullpage-mobile-mute-toggle {
+  display: none !important;
 }
 
 /* Fullscreen button (positioned at top-right of the video UI) */
@@ -2172,7 +2181,7 @@ body.video-fullscreen-active .project-overlay .close-overlay {
   }
 
   .project-overlay.active .overlay-panel:not(.is-full-page):not(.is-chapter-page) .video-mute-wrapper {
-    display: flex;
+    display: none !important;
     justify-content: center;
     position: absolute;
     top: calc(100% + 20px);
@@ -2198,7 +2207,7 @@ body.video-fullscreen-active .project-overlay .close-overlay {
   }
 
   .project-overlay.active .overlay-panel.is-chapter-page .video-mute-wrapper {
-    display: flex !important;
+    display: none !important;
     position: absolute;
     bottom: 10px;
     right: 12px;
@@ -2221,6 +2230,10 @@ body.video-fullscreen-active .project-overlay .close-overlay {
   .project-overlay.active .overlay-panel.is-chapter-page .video-play-ctrl.is-inactive {
     opacity: 0 !important;
     pointer-events: auto !important;
+  }
+
+  .project-overlay .fullpage-mobile-mute-toggle {
+    display: none !important;
   }
 
   .project-overlay.active .overlay-panel.is-chapter-page .video-shell {
@@ -2439,7 +2452,7 @@ body.video-fullscreen-active .project-overlay .close-overlay {
 
   body.route-showreel .filter-list {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     row-gap: 14px;
     column-gap: 0;
     width: 100%;
@@ -2452,16 +2465,28 @@ body.video-fullscreen-active .project-overlay .close-overlay {
     text-align: center;
   }
 
-  body.route-showreel .filter-item:nth-child(5) {
+  body.route-showreel .filter-item:first-child {
+    grid-column: 1 / -1;
+  }
+
+  body.route-showreel .filter-item:nth-child(2) {
     grid-column: 1 / span 2;
-    justify-self: center;
-    white-space: nowrap;
+  }
+
+  body.route-showreel .filter-item:nth-child(3) {
+    grid-column: 3 / span 2;
+  }
+
+  body.route-showreel .filter-item:nth-child(4) {
+    grid-column: 5 / span 2;
+  }
+
+  body.route-showreel .filter-item:nth-child(5) {
+    grid-column: 2 / span 2;
   }
 
   body.route-showreel .filter-item:nth-child(6) {
-    grid-column: 3 / span 2;
-    justify-self: center;
-    white-space: nowrap;
+    grid-column: 4 / span 2;
   }
 
   body.route-showreel .mobile-filter-toggle {
