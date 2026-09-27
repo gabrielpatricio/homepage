@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gapa studio</title>
+  <script src="/assets/js/photo-albums.js"></script>
+  <script>
+    (() => {
+      const slugify = (value) => String(value || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "");
+
+      let segments;
+      try {
+        segments = decodeURIComponent(location.pathname).split("/").filter(Boolean);
+      } catch (_) {
+        location.replace("/#showreel");
+        return;
+      }
+
+      const candidate = segments.length === 1
+        ? segments[0]
+        : segments.length === 2 && segments[0].toLowerCase() === "photography"
+          ? segments[1]
+          : "";
+      const album = (window.PHOTO_ALBUMS || []).find((item) => slugify(item.name) === slugify(candidate));
+
+      if (album) {
+        location.replace(`/#photography/${encodeURIComponent(slugify(album.name))}`);
+      } else {
+        location.replace("/#showreel");
+      }
+    })();
+  </script>
+</head>
+<body>
+  <p>Opening gapa studio… <a href="/#showreel">Continue to the portfolio</a></p>
+</body>
+</html>

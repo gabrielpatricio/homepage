@@ -76,6 +76,14 @@
       <div class="overlay-panel project-panel">
         <div class="project-media">
           <div id="project-video-grid" class="project-video-grid"></div>
+          <nav id="project-sequence-nav" class="project-sequence-nav" aria-label="Project sequence" hidden>
+            <button id="project-sequence-previous" type="button" aria-label="Previous project">←</button>
+            <span class="project-sequence-label">
+              <span id="project-sequence-title" class="project-sequence-title" aria-live="polite"></span>
+              <span id="project-sequence-counter" class="project-sequence-counter" aria-label="Project number"></span>
+            </span>
+            <button id="project-sequence-next" type="button" aria-label="Next project">→</button>
+          </nav>
           <div class="project-stills-shell">
             <div id="project-stills-grid" class="project-stills-grid"></div>
             <div id="project-stills-dots" class="project-stills-dots" hidden></div>

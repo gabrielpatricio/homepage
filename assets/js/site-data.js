@@ -397,7 +397,7 @@ window.PORTFOLIO_DATA = {
     },
     {
       slug: "ses-interview",
-      title: "ses x monday merch - success stories",
+      title: "ses x monday merch",
       hidden: false,
       hideStills: true,
       role: "Videographer / Editor",
@@ -653,7 +653,7 @@ window.PORTFOLIO_DATA = {
     },
     {
       slug: "metaview-interview",
-      title: "metaview x monday merch - success stories",
+      title: "metaview x monday merch",
       hideStills: true,
       role: "Videographer / Editor",
       year: "2026",
@@ -701,7 +701,7 @@ window.PORTFOLIO_DATA = {
     },
      {
       slug: "nown-interview",
-      title: "nown x monday merch - success stories",
+      title: "nown x monday merch",
       role: "Videographer / Editor",
       year: "2026",
       type: "Brand Film",
@@ -792,7 +792,7 @@ window.PORTFOLIO_DATA = {
     },
        {
       slug: "adbsafegate-interview",
-      title: "adb safegate x monday merch - success stories",
+      title: "adb safegate x monday merch",
       role: "Videographer / Editor",
       year: "2026",
       type: "Brand Film",
@@ -817,7 +817,7 @@ description: "Filmed at ADB SAFEGATE's headquarters in Belgium and directed, sho
     },
     {
       slug: "illimone-interview",
-      title: "il limone x monday merch - success stories",
+      title: "il limone x monday merch",
       role: "Videographer / Editor",
       year: "2026",
       type: "Brand Film",
@@ -887,6 +887,24 @@ description: "Filmed at Il Limone in Breda and directed, shot, and edited by Gab
         "assets/media/projects/mavka/stills/3.jpeg"      
       ]
     },
+  ],
+
+  // A group renders as one showreel node. Its project slugs define overlay navigation order.
+  projectGroups: [
+    {
+      slug: "monday-merch-success-stories",
+      title: "monday merch - success stories",
+      role: "Videographer / Editor",
+      year: "2025–2026",
+      type: "Brand Film",
+      projects: [
+        "illimone-interview",
+        "nown-interview",
+        "metaview-interview",
+        "adbsafegate-interview",
+        "ses-interview"
+      ]
+    }
   ],
 
   photoAlbums: (window.PHOTO_ALBUMS || []).map((album) => ({

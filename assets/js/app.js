@@ -73,6 +73,11 @@
     toggleFiltersButton: document.getElementById("toggle-filters-button"),
     projectStage: document.getElementById("project-stage"),
     projectOverlay: document.getElementById("project-overlay"),
+    projectSequenceNav: document.getElementById("project-sequence-nav"),
+    projectSequencePrevious: document.getElementById("project-sequence-previous"),
+    projectSequenceTitle: document.getElementById("project-sequence-title"),
+    projectSequenceCounter: document.getElementById("project-sequence-counter"),
+    projectSequenceNext: document.getElementById("project-sequence-next"),
     projectPanel: document.querySelector(".project-panel"),
     projectMedia: document.querySelector(".project-media"),
     projectVideoGrid: document.getElementById("project-video-grid"),
@@ -349,7 +354,7 @@
     state.introReadyPromise = preloadIntroAssets();
 
     const alreadySeenIntro = sessionStorage.getItem("portfolioIntroSeen") === "true";
-    if (alreadySeenIntro || location.hash) {
+    if (alreadySeenIntro || location.hash || getDirectAlbumPathSlug()) {
       completeIntro(true);
     } else {
       scheduleIdleIntro();
@@ -562,15 +567,20 @@
 
   function assignProjectIndexes() {
     let visibleIndex = 1;
+    const renderableProjects = getRenderableProjects();
+    const renderableSlugs = new Set(renderableProjects.map((project) => project.slug));
 
     data.projects.forEach((project) => {
-      if (project.hidden) {
-        delete project.index;
-        return;
-      }
+      if (!renderableSlugs.has(project.slug)) delete project.index;
+    });
 
+    renderableProjects.forEach((project) => {
       const formattedIndex = String(visibleIndex).padStart(2, "0");
       project.index = `[${formattedIndex}]`;
+      if (project.isProjectGroup) {
+        const group = (data.projectGroups || []).find((item) => item.slug === project.slug);
+        if (group) group.index = project.index;
+      }
       visibleIndex += 1;
     });
   }
@@ -684,6 +694,14 @@
     });
     els.projectStillViewerPrevious?.addEventListener("click", () => navigateProjectStillViewer(-1));
     els.projectStillViewerNext?.addEventListener("click", () => navigateProjectStillViewer(1));
+    els.projectSequencePrevious?.addEventListener("click", () => {
+      const href = els.projectSequencePrevious.dataset.href;
+      if (href) location.hash = href;
+    });
+    els.projectSequenceNext?.addEventListener("click", () => {
+      const href = els.projectSequenceNext.dataset.href;
+      if (href) location.hash = href;
+    });
     els.projectStillViewer.addEventListener("touchstart", (event) => {
       state.projectStillViewerTouchStartX = event.changedTouches[0]?.clientX ?? null;
     }, { passive: true });
@@ -943,9 +961,61 @@
     });
   }
 
+  function getProjectGroupProjects(group) {
+    if (!Array.isArray(group?.projects)) return [];
+
+    return group.projects
+      .map((reference) => {
+        const slug = typeof reference === "string" ? reference : reference?.slug;
+        return data.projects.find((project) => project.slug === slug && !project.hidden);
+      })
+      .filter(Boolean);
+  }
+
+  function getProjectGroupForSlug(slug) {
+    return (data.projectGroups || []).find((group) =>
+      getProjectGroupProjects(group).some((project) => project.slug === slug)
+    ) || null;
+  }
+
+  function getRenderableProjects() {
+    const groupsByMemberSlug = new Map();
+    (data.projectGroups || []).forEach((group) => {
+      getProjectGroupProjects(group).forEach((project) => {
+        if (!groupsByMemberSlug.has(project.slug)) groupsByMemberSlug.set(project.slug, group);
+      });
+    });
+
+    const seenGroups = new Set();
+    const renderableProjects = [];
+
+    data.projects.forEach((project) => {
+      if (project.hidden) return;
+
+      const group = groupsByMemberSlug.get(project.slug);
+      if (!group) {
+        renderableProjects.push(project);
+        return;
+      }
+
+      if (seenGroups.has(group.slug)) return;
+      seenGroups.add(group.slug);
+      const members = getProjectGroupProjects(group);
+      renderableProjects.push({
+        ...group,
+        isProjectGroup: true,
+        categories: [...new Set(members.flatMap((member) => member.categories || []))],
+        highlight: group.highlight || members[0]?.highlight || 1,
+        stills: members.flatMap((member) => member.stills || [])
+      });
+    });
+
+    return renderableProjects;
+  }
+
   function getVisibleProjects() {
     if (state.selectedFilters.size === 0) return [];
-    return data.projects.filter((project) =>
+    return getRenderableProjects().filter((project) =>
       !project.hidden && project.categories.some((category) => state.selectedFilters.has(category))
     );
   }
@@ -953,7 +1023,7 @@
   function renderProjects() {
     els.projectStage.innerHTML = "";
     state.projectNodeMap.clear();
-    const renderableProjects = data.projects.filter((project) => !project.hidden);
+    const renderableProjects = getRenderableProjects();
 
     renderDesktopProjectBackdrop();
 
@@ -1546,7 +1616,10 @@
 
   function buildProjectNode(project) {
     const link = document.createElement("a");
-    link.href = `#project/${project.slug}`;
+    const groupProjects = project.isProjectGroup ? getProjectGroupProjects(project) : [];
+    link.href = project.isProjectGroup && groupProjects.length
+      ? `#project-group/${project.slug}/${groupProjects[0].slug}`
+      : `#project/${project.slug}`;
     link.className = `project-item highlight-${project.highlight}`;
     link.dataset.slug = project.slug;
     link.innerHTML = `
@@ -1774,7 +1847,14 @@
     clearVideoFullscreenForRouteChange();
 
     const hash = location.hash.replace(/^#/, "");
-    const [route, slug] = hash.split("/");
+    let [route, slug, memberSlug] = hash.split("/");
+    if (!route) {
+      const pathAlbumSlug = getDirectAlbumPathSlug();
+      if (pathAlbumSlug) {
+        route = "photography";
+        slug = pathAlbumSlug;
+      }
+    }
 
     document.body.classList.remove("route-showreel", "route-photography", "route-about", "route-project");
 
@@ -1810,7 +1890,7 @@
       els.galleryOverlay.setAttribute("aria-hidden", "false");
       document.body.classList.add("route-photography");
       lockPageScroll();
-      openGallery();
+      openGallery(slug || "");
       return;
     }
 
@@ -1827,21 +1907,30 @@
       return;
     }
 
+    let project = null;
+    let projectGroup = null;
     if (route === "project" && slug) {
-      const project = data.projects.find((item) => item.slug === slug && !item.hidden);
-      if (project) {
-        stopMobileBackdropKeepAlive();
-        stopMobileBackdropCycle();
-        stopDesktopBackdropKeepAlive();
-        closeAllOverlays();
-        populateProjectOverlay(project);
-        els.projectOverlay.classList.add("active");
-        els.projectOverlay.setAttribute("aria-hidden", "false");
-        document.body.classList.add("route-project");
-        lockPageScroll();
-        stopGallery();
-        return;
-      }
+      project = data.projects.find((item) => item.slug === slug && !item.hidden) || null;
+      projectGroup = project ? getProjectGroupForSlug(project.slug) : null;
+    } else if (route === "project-group" && slug && memberSlug) {
+      projectGroup = (data.projectGroups || []).find((group) => group.slug === slug) || null;
+      project = projectGroup
+        ? getProjectGroupProjects(projectGroup).find((item) => item.slug === memberSlug) || null
+        : null;
+    }
+
+    if (project) {
+      stopMobileBackdropKeepAlive();
+      stopMobileBackdropCycle();
+      stopDesktopBackdropKeepAlive();
+      closeAllOverlays();
+      populateProjectOverlay(project, projectGroup);
+      els.projectOverlay.classList.add("active");
+      els.projectOverlay.setAttribute("aria-hidden", "false");
+      document.body.classList.add("route-project");
+      lockPageScroll();
+      stopGallery();
+      return;
     }
 
     location.hash = "#showreel";
@@ -1935,8 +2024,25 @@
     ensureDesktopBackdropPlayback();
   }
 
-  function populateProjectOverlay(project) {
+  function populateProjectOverlay(project, projectGroup = getProjectGroupForSlug(project.slug)) {
     state.currentProject = project;
+    const sequenceProjects = getProjectGroupProjects(projectGroup);
+    const sequenceIndex = sequenceProjects.findIndex((item) => item.slug === project.slug);
+    const previousProject = sequenceProjects[sequenceIndex - 1];
+    const nextProject = sequenceProjects[sequenceIndex + 1];
+    els.projectSequenceNav.hidden = sequenceProjects.length < 2;
+    els.projectSequencePrevious.disabled = !previousProject;
+    els.projectSequencePrevious.dataset.href = previousProject
+      ? projectGroup ? `#project-group/${projectGroup.slug}/${previousProject.slug}` : `#project/${previousProject.slug}`
+      : "";
+    els.projectSequenceTitle.textContent = project.title;
+    els.projectSequenceCounter.textContent = sequenceProjects.length > 1
+      ? `${sequenceIndex + 1} / ${sequenceProjects.length}`
+      : "";
+    els.projectSequenceNext.disabled = !nextProject;
+    els.projectSequenceNext.dataset.href = nextProject
+      ? projectGroup ? `#project-group/${projectGroup.slug}/${nextProject.slug}` : `#project/${nextProject.slug}`
+      : "";
     const isFullPage = Boolean(project.fullPage);
     const isChapterPage = Boolean(project.chapterPage);
     const hasDescription = Boolean(project.description);
@@ -3599,6 +3705,38 @@
     shell.style.gridRow = String(rowStart + (pos === 2 ? 0 : 1));
   }
 
+  function slugifyAlbumName(name) {
+    return String(name || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
+  }
+
+  function getAlbumIndexBySlug(slug) {
+    const normalizedSlug = slugifyAlbumName(slug);
+    return data.photoAlbums.findIndex((album) => slugifyAlbumName(album.name) === normalizedSlug);
+  }
+
+  function getDirectAlbumPathSlug() {
+    let segments;
+    try {
+      segments = decodeURIComponent(location.pathname).split("/").filter(Boolean);
+    } catch (_) {
+      return "";
+    }
+
+    const candidate = segments.length === 1
+      ? segments[0]
+      : segments.length === 2 && segments[0].toLowerCase() === "photography"
+        ? segments[1]
+        : "";
+    const albumIndex = getAlbumIndexBySlug(candidate);
+    return albumIndex >= 0 ? slugifyAlbumName(data.photoAlbums[albumIndex].name) : "";
+  }
+
   function prepareGalleryData() {
     let currentStartIndex = 0;
     state.gallery.albumRanges = data.photoAlbums.map((album) => {
@@ -3622,12 +3760,19 @@
     updateAlbumName();
   }
 
-  function openGallery() {
+  function openGallery(initialAlbumSlug = "") {
     if (!state.gallery.flatImages.length) return;
     state.gallery.paused = false;
     clearGalleryTimers();
     state.gallery.sequence = [];
     state.gallery.albumQueue = buildAlbumQueue();
+    const initialAlbumIndex = getAlbumIndexBySlug(initialAlbumSlug);
+    if (initialAlbumIndex >= 0) {
+      state.gallery.albumQueue = [
+        initialAlbumIndex,
+        ...state.gallery.albumQueue.filter((index) => index !== initialAlbumIndex)
+      ];
+    }
     state.gallery.albumQueueIndex = 0;
     state.gallery.activeAlbumIndex = -1;
     state.gallery.activeAlbumPhotoIndex = 0;

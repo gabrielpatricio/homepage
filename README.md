@@ -42,6 +42,10 @@ Then open:
 http://localhost:8000
 ```
 
+## Direct photography album URLs
+
+Albums can be opened directly with a slug path, such as `/paris` or `/costa-vicentina`. On GitHub Pages, `404.html` forwards these paths to the matching album route. For local static-server testing, use the hash route instead, such as `/#photography/paris`.
+
 ## Publish to GitHub Pages
 
 1. Create a new GitHub repository.
@@ -87,6 +91,8 @@ Each project supports:
 - `credits`
 - `videoEmbed`
 - `stills`
+
+To show related projects as one showreel node, add an object to `projectGroups` in `assets/js/site-data.js` with a `slug`, `title`, `role`, `year`, `type`, and ordered `projects` array of project slugs. Selecting that node opens the first project; previous/next controls navigate through the group. Group members are omitted as separate nodes.
 
 ### `assets/media/avatar-placeholder.png`
 Replace this with your portrait for the About page.

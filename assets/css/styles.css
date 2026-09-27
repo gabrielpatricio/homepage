@@ -864,7 +864,7 @@ body.route-showreel .project-stage-mobile-backdrop {
 .project-panel:not(.is-full-page):not(.is-chapter-page) .project-media {
   padding: 70px 20px 2px;
   gap: 12px;
-  justify-content: space-between;
+  justify-content: flex-start;
   overflow: hidden;
 }
 
@@ -1483,7 +1483,7 @@ body.video-fullscreen-fallback-active {
   overflow: hidden !important;
 }
 
-.project-panel:not(.is-full-page).has-stills .project-video-grid:not(:empty) + .project-stills-shell {
+.project-panel:not(.is-full-page).has-stills .project-video-grid:not(:empty) ~ .project-stills-shell {
   border-top: 3px solid #fff;
   padding-top: 28px;
 }
@@ -2069,6 +2069,72 @@ body.video-fullscreen-fallback-active {
 .project-overlay .close-overlay:focus-visible {
   background: transparent;
   opacity: 0.7;
+}
+
+.project-sequence-nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: min(90%, 920px);
+  margin: 2px auto 12px;
+  align-self: center;
+}
+
+.project-sequence-nav[hidden] {
+  display: none;
+}
+
+.project-sequence-nav button {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.project-sequence-nav button:hover,
+.project-sequence-nav button:focus-visible {
+  opacity: 0.68;
+  outline: none;
+}
+
+.project-sequence-nav button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.project-sequence-label {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.project-sequence-title {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.project-sequence-counter {
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  line-height: 1;
 }
 
 body.video-fullscreen-active .project-overlay .close-overlay {
@@ -2910,6 +2976,17 @@ body.video-fullscreen-active .project-overlay .close-overlay {
     cursor: pointer;
     font-family: inherit;
     transition: opacity 0.2s ease;
+  }
+
+  .project-overlay .project-sequence-nav {
+    width: min(100%, 920px);
+    margin-top: 16px;
+  }
+
+  .project-overlay .project-sequence-nav button {
+    flex-basis: 34px;
+    width: 34px;
+    height: 34px;
   }
 
   .project-overlay .project-see-more:hover {
